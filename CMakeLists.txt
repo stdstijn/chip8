@@ -55,7 +55,6 @@ endif()
 
 # Create an option to switch between a system SDL library and a vendored SDL library
 option(VENDORED_SDL "Use vendored SDL library" ON)
-
 if(VENDORED_SDL)
   add_subdirectory(extern/sdl EXCLUDE_FROM_ALL)
 else()
