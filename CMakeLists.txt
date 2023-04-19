@@ -49,3 +49,16 @@ if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR CHIP8_BUILD_TESTING)
    AND BUILD_TESTING)
   add_subdirectory(tests)
 endif()
+
+# Create an option to switch between a system SDL library and a vendored SDL library
+option(VENDORED_SDL "Use vendored SDL library" OFF)
+
+if(VENDORED_SDL)
+  add_subdirectory(extern/sdl EXCLUDE_FROM_ALL)
+else()
+  # 1. Look for a SDL2 package, 2. look for the SDL2 component and 3. fail if none can be found
+  find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+
+  # 1. Look for a SDL2 package, 2. Look for the SDL2maincomponent and 3. DO NOT fail when SDL2main is not available
+  find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
+endif()
