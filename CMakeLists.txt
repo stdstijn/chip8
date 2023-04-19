@@ -11,8 +11,8 @@ project(
 # Only do these if this is the main project, and not if it is included through add_subdirectory
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # Optionally set things like CMAKE_C_STANDARD, CMAKE_POSITION_INDEPENDENT_CODE here
-
-  # Let's ensure -std=cxx instead of -std=gxx
+  set(CMAKE_C_STANDARD 17)
+  set(CMAKE_C_STANDARD_REQUIRED ON)
   set(CMAKE_C_EXTENSIONS OFF)
 
   # Let's nicely support folders in IDEs
@@ -23,6 +23,22 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # since it calls enable_testing, which must be in the
   # main CMakeLists.
   include(CTest)
+
+  # The executable code only available if this is the main app
+  add_subdirectory(apps)
+
+  # Create an option to switch between a system sdl library and a vendored sdl library
+  option(VENDORED "Use vendored libraries" ON)
+
+  if(VENDORED)
+    add_subdirectory(extern/sdl)
+  else()
+    # 1. Look for a SDL2 package, 2. look for the SDL2 component and 3. fail if none can be found
+    find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
+
+    # 1. Look for a SDL2 package, 2. Look for the SDL2maincomponent and 3. DO NOT fail when SDL2main is not available
+    find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
+  endif()
 
   # Docs only available if this is the main app
   find_package(Doxygen)
@@ -39,9 +55,6 @@ include(FetchContent)
 
 # The compiled library code is here
 add_subdirectory(src)
-
-# The executable code is here
-add_subdirectory(apps)
 
 # Testing only available if this is the main app
 # Emergency override MODERN_CMAKE_BUILD_TESTING provided as well
