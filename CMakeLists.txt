@@ -24,22 +24,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # main CMakeLists.
   include(CTest)
 
-  # The executable code only available if this is the main app
-  add_subdirectory(apps)
-
-  # Create an option to switch between a system sdl library and a vendored sdl library
-  option(VENDORED "Use vendored libraries" ON)
-
-  if(VENDORED)
-    add_subdirectory(extern/sdl)
-  else()
-    # 1. Look for a SDL2 package, 2. look for the SDL2 component and 3. fail if none can be found
-    find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
-
-    # 1. Look for a SDL2 package, 2. Look for the SDL2maincomponent and 3. DO NOT fail when SDL2main is not available
-    find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
-  endif()
-
   # Docs only available if this is the main app
   find_package(Doxygen)
   if(Doxygen_FOUND)
@@ -55,6 +39,9 @@ include(FetchContent)
 
 # The compiled library code is here
 add_subdirectory(src)
+
+# The executable code is here
+add_subdirectory(apps)
 
 # Testing only available if this is the main app
 # Emergency override MODERN_CMAKE_BUILD_TESTING provided as well
