@@ -54,7 +54,7 @@ if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR CHIP8_BUILD_TESTING)
 endif()
 
 # Create an option to switch between a system SDL library and a vendored SDL library
-option(VENDORED_SDL "Use vendored SDL library" ON)
+option(VENDORED_SDL "Use vendored SDL library" OFF)
 if(VENDORED_SDL)
   add_subdirectory(extern/sdl EXCLUDE_FROM_ALL)
 else()
