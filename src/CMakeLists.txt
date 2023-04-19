@@ -11,9 +11,6 @@ add_library(chip8 chip8.c ${HEADER_LIST})
 # We need this directory, and users of our library will need it too
 target_include_directories(chip8 PUBLIC ../include)
 
-# This depends on (header only) boost
-target_link_libraries(chip8 PRIVATE)
-
 # All users of this library will need at least C17
 target_compile_features(chip8 PUBLIC c_std_17)
 
