@@ -15,6 +15,9 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   set(CMAKE_C_STANDARD_REQUIRED ON)
   set(CMAKE_C_EXTENSIONS OFF)
 
+  # Make sure executable will end up in the build directory
+  set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
   # Let's nicely support folders in IDEs
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
