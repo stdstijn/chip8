@@ -12,7 +12,7 @@ add_executable(chip8_test chip8_test.c)
 target_compile_features(chip8_test PRIVATE c_std_17)
 
 # Should be linked to the main library
-target_link_libraries(chip8_test PRIVATE chip8 unity)
+target_link_libraries(chip8_test PRIVATE unity chip8)
 
 # If you register a test, then ctest and make test will run it.
 # You can also run examples and check the output, as well.
