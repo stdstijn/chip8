@@ -15,7 +15,6 @@ typedef enum VirtualMachineDescription
     KEY_COUNT = 16,
     VIDEO_WIDTH = 64,
     VIDEO_HEIGHT = 32,
-    FONTSET_SIZE = 80
 } VirtualMachineDescription;
 
 typedef struct CPU CPU;
@@ -35,10 +34,10 @@ struct CPU
     unsigned char key[KEY_COUNT];
     unsigned char gfx[VIDEO_WIDTH * VIDEO_HEIGHT];
 
-    OpcodeFunc opcodetable[];
+    OpcodeFunc table[];
 };
 
-static const uint8_t fontset[FONTSET_SIZE] = {
+static const uint8_t fontset[] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
