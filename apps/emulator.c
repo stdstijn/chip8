@@ -193,26 +193,30 @@ int main(int argc, char *argv[])
     SDL_RWclose(fp);
 
     int videoPitch = sizeof(chip8.gfx[0]) * VIDEO_WIDTH;
-    
-    uint32_t frameprev = SDL_GetTicks();
+
+    uint32_t framePrev = SDL_GetTicks();
     const uint32_t frameTime = ((1.0 / CLOCK_HZ) * 1000 + 0.5);
 
     int quit = 0;
+
     while (!quit)
     {
         quit = PlatformProcessInput(chip8.key);
 
-        Chip8Cycle(&chip8);
+        Chip8_Cycle(&chip8);
         PlatformUpdate(&plat, chip8.gfx, videoPitch);
-        uint32_t framenow = SDL_GetTicks();
-        if (framenow - frameprev < frameTime)
+
+        uint32_t frameNow = SDL_GetTicks();
+
+        if (frameNow - framePrev < frameTime)
         {
-            SDL_Delay(frameTime - (framenow - frameprev));
+            SDL_Delay(frameTime - (frameNow - framePrev));
         }
-        frameprev = framenow;
+
+        framePrev = frameNow;
     }
 
-    PlatformDrestroy(&plat);
+    PlatformDestroy(&plat);
 
     return 0;
 }
