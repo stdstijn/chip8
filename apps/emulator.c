@@ -204,6 +204,7 @@ int main(int argc, char *argv[])
         quit = PlatformProcessInput(chip8.key);
 
         Chip8_Cycle(&chip8);
+        
         PlatformUpdate(&plat, chip8.gfx, videoPitch);
 
         uint32_t frameNow = SDL_GetTicks();
