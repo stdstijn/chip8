@@ -21,7 +21,7 @@ static const uint8_t fontset[] = {
 
 static void Dispatcher0(CPU *cpu)
 {
-    (*(cpu->dispatcher0[(cpu->opcode & 0x000Fu)]))(cpu);
+    (*(cpu->dispatcher0[cpu->opcode & 0x000Fu]))(cpu);
 }
 
 static void Dispatcher1(CPU *cpu)
@@ -61,7 +61,7 @@ static void Dispatcher7(CPU *cpu)
 
 static void Dispatcher8(CPU *cpu)
 {
-    (*(cpu->dispatcher8[(cpu->opcode & 0x000Fu)]))(cpu);
+    (*(cpu->dispatcher8[cpu->opcode & 0x000Fu]))(cpu);
 }
 
 static void Dispatcher9(CPU *cpu)
@@ -91,12 +91,12 @@ static void DispatcherD(CPU *cpu)
 
 static void DispatcherE(CPU *cpu)
 {
-    (*(cpu->dispatcherE[(cpu->opcode & 0x000Fu)]))(cpu);
+    (*(cpu->dispatcherE[cpu->opcode & 0x000Fu]))(cpu);
 }
 
 static void DispatcherF(CPU *cpu)
 {
-    (*(cpu->dispatcher0[(cpu->opcode & 0x00FFu)]))(cpu);
+    (*(cpu->dispatcher0[cpu->opcode & 0x00FFu]))(cpu);
 }
 
 static void ClearMemory(void *ptr, size_t len)
@@ -135,7 +135,7 @@ void Chip8_Create(CPU *cpu)
     cpu->pc = START_ADDRESS;
 
     // Load fontset
-    CopyMemory(fontset, cpu->memory + FONTSET_ADDRESS, sizeof(fontset));
+    CopyMemory(fontset, &cpu->memory[FONTSET_ADDRESS], sizeof(fontset));
 
     // Null dispatcher functions initially 
     NullOpcodeDispatcher(cpu->dispatcher0, sizeof(cpu->dispatcher0));
@@ -225,10 +225,10 @@ void Chip8_Cycle(CPU *cpu)
     cpu->pc += 2;
 
     // Decode opcode
-    unsigned short nibble = cpu->opcode & 0xF000u;
+    unsigned char nibble = (cpu->opcode & 0xF000u) >> 12u;
 
     // Execute opcode
-    (*(cpu->table[(nibble) >> 12u]))(cpu);
+    (*(cpu->table[nibble]))(cpu);
 
     // Update timers
     if (cpu->delaytimer > 0)
