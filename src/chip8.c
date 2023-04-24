@@ -225,7 +225,7 @@ void Chip8_Cycle(CPU *cpu)
     cpu->pc += 2;
 
     // Decode opcode
-    unsigned char nibble = (cpu->opcode & 0xF000u) >> 12u;
+    char nibble = (cpu->opcode & 0xF000u) >> 12u;
 
     // Execute opcode
     (*(cpu->table[nibble]))(cpu);
