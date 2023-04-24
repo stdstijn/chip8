@@ -109,12 +109,12 @@ static void ClearMemory(void *ptr, size_t len)
     }
 }
 
-static void CopyMemory(const void *src, void *dest, size_t len)
+static void CopyMemory(void *dest, const void *src, size_t num)
 {
     const char *srcByte = src;
     char *destByte = dest;
 
-    for (size_t i = 0; i < len; i++)
+    for (size_t i = 0; i < num; i++)
     {
         destByte[i] = srcByte[i];
     }
@@ -135,7 +135,7 @@ void Chip8_Create(CPU *cpu)
     cpu->pc = START_ADDRESS;
 
     // Load fontset
-    CopyMemory(fontset, &cpu->memory[FONTSET_ADDRESS], sizeof(fontset));
+    CopyMemory(&cpu->memory[FONTSET_ADDRESS], fontset, sizeof(fontset));
 
     // Null dispatcher functions initially 
     NullOpcodeDispatcher(cpu->dispatcher0, sizeof(cpu->dispatcher0));
@@ -235,7 +235,6 @@ void Chip8_Cycle(CPU *cpu)
     {
         cpu->delaytimer -= 1;
     }
-
     if (cpu->soundtimer > 0)
     {
         cpu->delaytimer -= 1;
