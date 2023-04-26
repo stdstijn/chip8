@@ -10,6 +10,13 @@ project(
 
 # Only do these if this is the main project, and not if it is included through add_subdirectory
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+  if ("${CMAKE_BINARY_DIR}" STREQUAL "${CMAKE_SOURCE_DIR}")
+  message(FATAL_ERROR "In-source builds are not allowed.
+    Please create a subfolder and use `cmake ..` inside it.
+    NOTE: cmake creates CMakeCache.txt and CMakeFiles/*.
+          Remove them, or cmake will refuse to work.")
+  endif()
+
   # Optionally set things like CMAKE_C_STANDARD, CMAKE_POSITION_INDEPENDENT_CODE here
   set(CMAKE_C_STANDARD 17)
   set(CMAKE_C_STANDARD_REQUIRED ON)
@@ -27,9 +34,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   # main CMakeLists.
   include(CTest)
 
-  # The executable code is here
-  add_subdirectory(apps)
-
   # Create an option to switch between a system SDL library and a vendored SDL library
   option(VENDORED_SDL "Use vendored SDL library" OFF)
   if(VENDORED_SDL)
@@ -37,7 +41,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   else()
     # 1. Look for a SDL2 package, 2. look for the SDL2 component and 3. fail if none can be found
     find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
-
     # 1. Look for a SDL2 package, 2. Look for the SDL2maincomponent and 3. DO NOT fail when SDL2main is not available
     find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
   endif()
@@ -49,6 +52,9 @@ include(FetchContent)
 
 # The compiled library code is here
 add_subdirectory(src)
+
+# The executable code is here
+add_subdirectory(apps)
 
 # Testing only available if this is the main app
 # Emergency override MODERN_CMAKE_BUILD_TESTING provided as well
