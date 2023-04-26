@@ -9,6 +9,71 @@ typedef struct Platform
     SDL_Texture *texture;
 } Platform;
 
+void PlatformCreate(Platform *p, char const *title, int windowWidth, int windowHeight, int textureWidth, int textureHeight);
+void PlatformDestroy(Platform *p);
+void PlatformUpdate(Platform *p, void const *buffer, int pitch);
+int PlatformProcessInput(uint8_t *keys);
+
+int main(int argc, char *argv[])
+{
+    if (argc != 4)
+    {
+        SDL_Log("Usage: %s <Scale> <ROM>\n", argv[0]);
+        return 1;
+    }
+
+    int videoScale = SDL_atoi(argv[1]);
+    char const *romFilename = argv[3];
+
+    Platform plat = {0};
+    PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH * videoScale, VIDEO_HEIGHT * videoScale, VIDEO_WIDTH, VIDEO_HEIGHT);
+
+    CPU chip8 = {0};
+    Chip8_Create(&chip8);
+
+    SDL_RWops *fp = SDL_RWFromFile(romFilename, "rb");
+
+    if (!fp)
+    {
+        SDL_Log("emu: could not open ROM: %s", romFilename);
+        return 1;
+    }
+
+    size_t memsize = MEMORY_SIZE - START_ADDRESS;
+
+    SDL_RWread(fp, chip8.memory + START_ADDRESS, 1, memsize);
+    SDL_RWclose(fp);
+
+    int videoPitch = sizeof(chip8.gfx[0]) * VIDEO_WIDTH;
+
+    uint32_t framePrev = SDL_GetTicks();
+    const uint32_t frameTime = ((1.0 / CLOCK_HZ) * 1000 + 0.5);
+
+    int quit = 0;
+
+    while (!quit)
+    {
+        quit = PlatformProcessInput(chip8.key);
+
+        Chip8_Cycle(&chip8);
+        
+        PlatformUpdate(&plat, chip8.gfx, videoPitch);
+
+        uint32_t frameNow = SDL_GetTicks();
+
+        if (frameNow - framePrev < frameTime)
+        {
+            SDL_Delay(frameTime - (frameNow - framePrev));
+        }
+
+        framePrev = frameNow;
+    }
+
+    PlatformDestroy(&plat);
+
+    return 0;
+}
+
 void PlatformCreate(Platform *p, char const *title, int windowWidth, int windowHeight, int textureWidth, int textureHeight)
 {
     SDL_Init(SDL_INIT_VIDEO);
@@ -160,64 +225,4 @@ int PlatformProcessInput(uint8_t *keys)
     }
 
     return quit;
-}
-
-int main(int argc, char *argv[])
-{
-    if (argc != 4)
-    {
-        SDL_Log("Usage: %s <Scale> <ROM>\n", argv[0]);
-        return 1;
-    }
-
-    int videoScale = SDL_atoi(argv[1]);
-    char const *romFilename = argv[3];
-
-    Platform plat = {0};
-    PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH * videoScale, VIDEO_HEIGHT * videoScale, VIDEO_WIDTH, VIDEO_HEIGHT);
-
-    CPU chip8 = {0};
-    Chip8_Create(&chip8);
-
-    SDL_RWops *fp = SDL_RWFromFile(romFilename, "rb");
-
-    if (!fp)
-    {
-        SDL_Log("emu: could not open ROM: %s", romFilename);
-        return 1;
-    }
-
-    size_t memsize = MEMORY_SIZE - START_ADDRESS;
-
-    SDL_RWread(fp, chip8.memory + START_ADDRESS, 1, memsize);
-    SDL_RWclose(fp);
-
-    int videoPitch = sizeof(chip8.gfx[0]) * VIDEO_WIDTH;
-
-    uint32_t framePrev = SDL_GetTicks();
-    const uint32_t frameTime = ((1.0 / CLOCK_HZ) * 1000 + 0.5);
-
-    int quit = 0;
-
-    while (!quit)
-    {
-        quit = PlatformProcessInput(chip8.key);
-
-        Chip8_Cycle(&chip8);
-        
-        PlatformUpdate(&plat, chip8.gfx, videoPitch);
-
-        uint32_t frameNow = SDL_GetTicks();
-
-        if (frameNow - framePrev < frameTime)
-        {
-            SDL_Delay(frameTime - (frameNow - framePrev));
-        }
-
-        framePrev = frameNow;
-    }
-
-    PlatformDestroy(&plat);
-
-    return 0;
 }
