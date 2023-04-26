@@ -22,6 +22,9 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   set(CMAKE_C_STANDARD_REQUIRED ON)
   set(CMAKE_C_EXTENSIONS OFF)
 
+  # Add compile options
+  add_compile_options(-Wall -Wextra -pedantic -Werror -Wno-unused-parameter)
+
   # Make sure executable will end up in the build directory
   set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
