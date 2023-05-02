@@ -35,24 +35,24 @@ struct CPU
     unsigned char key[KEY_COUNT];
     unsigned char gfx[VIDEO_WIDTH * VIDEO_HEIGHT];
 
-    OpcodeFunc table[0xF + 1];
+    OpcodeFunc opcodetable[0xF + 1];
 
-    OpcodeFunc dispatcher0[0xE + 1];
-    OpcodeFunc dispatcher1[0x0 + 1];
-    OpcodeFunc dispatcher2[0x0 + 1];
-    OpcodeFunc dispatcher3[0x0 + 1];
-    OpcodeFunc dispatcher4[0x0 + 1];
-    OpcodeFunc dispatcher5[0x0 + 1];
-    OpcodeFunc dispatcher6[0x0 + 1];
-    OpcodeFunc dispatcher7[0x0 + 1];
-    OpcodeFunc dispatcher8[0xE + 1];
-    OpcodeFunc dispatcher9[0x0 + 1];
-    OpcodeFunc dispatcherA[0x0 + 1];
-    OpcodeFunc dispatcherB[0x0 + 1];
-    OpcodeFunc dispatcherC[0x0 + 1];
-    OpcodeFunc dispatcherD[0x0 + 1];
-    OpcodeFunc dispatcherE[0xE + 1];
-    OpcodeFunc dispatcherF[0x65 + 1];
+    OpcodeFunc subtable0[0xE + 1];
+    OpcodeFunc subtable1[0x0 + 1];
+    OpcodeFunc subtable2[0x0 + 1];
+    OpcodeFunc subtable3[0x0 + 1];
+    OpcodeFunc subtable4[0x0 + 1];
+    OpcodeFunc subtable5[0x0 + 1];
+    OpcodeFunc subtable6[0x0 + 1];
+    OpcodeFunc subtable7[0x0 + 1];
+    OpcodeFunc subtable8[0xE + 1];
+    OpcodeFunc subtable9[0x0 + 1];
+    OpcodeFunc subtableA[0x0 + 1];
+    OpcodeFunc subtableB[0x0 + 1];
+    OpcodeFunc subtableC[0x0 + 1];
+    OpcodeFunc subtableD[0x0 + 1];
+    OpcodeFunc subtableE[0xE + 1];
+    OpcodeFunc subtableF[0x65 + 1];
 };
 
 void Chip8_Create(CPU *cpu);
