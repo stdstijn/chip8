@@ -99,30 +99,30 @@ static void dispatcherF(CPU *cpu)
     (*(cpu->subtableF[cpu->opcode & 0x00FFu]))(cpu);
 }
 
-static void clearMemory(void *ptr, size_t num)
+static void clearMemory(void *ptr, unsigned int num)
 {
     char *cptr = ptr;
 
-    for (size_t i = 0; i < num; i++)
+    for (unsigned int i = 0; i < num; i++)
     {
         cptr[i] = 0;
     }
 }
 
-static void copyMemory(void *dest, const void *src, size_t num)
+static void copyMemory(void *dest, const void *src, unsigned int num)
 {
     const char *csrc = src;
     char *cdest = dest;
 
-    for (size_t i = 0; i < num; i++)
+    for (unsigned int i = 0; i < num; i++)
     {
         cdest[i] = csrc[i];
     }
 }
 
-static void nullOpcodetablePointers(OpcodeFunc dispatcher[], size_t num)
+static void nullOpcodetablePointers(OpcodeFunc dispatcher[], unsigned int num)
 {
-    for (size_t i = 0; i < num; i++)
+    for (unsigned int i = 0; i < num; i++)
     {
         dispatcher[i] = OP_0nnn;
     }
