@@ -1,9 +1,6 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
-#include <stdint.h>
-#include <stddef.h>
-
 typedef struct CPU CPU;
 typedef void (*OpcodeFunc)(CPU *);
 
@@ -33,7 +30,7 @@ struct CPU
     unsigned char delaytimer;
     unsigned char soundtimer;
     unsigned char key[KEY_COUNT];
-    unsigned char gfx[VIDEO_WIDTH * VIDEO_HEIGHT];
+    unsigned int gfx[VIDEO_WIDTH * VIDEO_HEIGHT];
 
     OpcodeFunc opcodetable[0xF + 1];
 
