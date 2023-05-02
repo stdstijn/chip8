@@ -135,7 +135,7 @@ void Chip8_Create(CPU *cpu)
     cpu->pc = START_ADDRESS;
 
     // Load fontset
-    copyMemory(&cpu->memory[FONTSET_ADDRESS], fontset, sizeof(fontset));
+    copyMemory(&cpu->memory[FONTSET_ADDRESS], fontset, 0x50);
 
     // Set subtable function pointers to OP_0nnn initially
     nullOpcodetablePointers(cpu->subtable0, 0xE + 1);
@@ -207,7 +207,7 @@ void Chip8_Create(CPU *cpu)
     cpu->subtableF[0x29] = OP_Fx29;
     cpu->subtableF[0x33] = OP_Fx33;
     cpu->subtableF[0x55] = OP_Fx55;
-    cpu->subtable9[0x65] = OP_Fx65;
+    cpu->subtableF[0x65] = OP_Fx65;
 }
 
 void Chip8_Cycle(CPU *cpu)
@@ -231,7 +231,7 @@ void Chip8_Cycle(CPU *cpu)
     }
     if (cpu->soundtimer > 0)
     {
-        cpu->delaytimer -= 1;
+        cpu->soundtimer -= 1;
     }
 }
 
@@ -243,6 +243,7 @@ void Chip8_Destroy(CPU *cpu)
 
 void OP_00E0(CPU *cpu) // CLS
 {
+    clearMemory(cpu->gfx, VIDEO_SIZE);
 }
 
 void OP_00EE(CPU *cpu) // RET
@@ -255,6 +256,8 @@ void OP_0nnn(CPU *cpu) // SYS addr
 
 void OP_1nnn(CPU *cpu) // JMP addr
 {
+    unsigned short address = cpu->opcode & 0x0FFFu;
+    cpu->pc = address;
 }
 
 void OP_2nnn(CPU *cpu) // CALL addr
@@ -275,10 +278,16 @@ void OP_5xy0(CPU *cpu) // SE Vx, Vy
 
 void OP_6xkk(CPU *cpu) // LD Vx, byte
 {
+    unsigned char Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    unsigned char byte = cpu->opcode & 0x00FFu;
+    cpu->V[Vx] = byte;
 }
 
 void OP_7xkk(CPU *cpu) // ADD Vx, byte
 {
+    unsigned char Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    unsigned char byte = cpu->opcode & 0x00FFu;
+    cpu->V[Vx] += byte;
 }
 
 void OP_8xy0(CPU *cpu) // LD Vx, Vy
@@ -323,6 +332,8 @@ void OP_9xy0(CPU *cpu) // SNE Vx, Vy
 
 void OP_Annn(CPU *cpu) // LD I, addr
 {
+    unsigned short address = cpu->opcode & 0x0FFFu;
+    cpu->I = address;
 }
 
 void OP_Bnnn(CPU *cpu) // JP V0, addr
@@ -335,6 +346,36 @@ void OP_Cxkk(CPU *cpu) // RND Vx, byte
 
 void OP_Dxyn(CPU *cpu) // DRW Vx, Vy, nibble
 {
+    unsigned char Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    unsigned char Vy = (cpu->opcode & 0x00F0u) >> 4u;
+    unsigned char height = cpu->opcode & 0x000Fu;
+
+    // Wrap if going beyond screen boundaries
+    unsigned char xPos = cpu->V[Vx] % VIDEO_WIDTH;
+    unsigned char yPos = cpu->V[Vy] % VIDEO_HEIGHT;
+
+    cpu->V[0xF] = 0;
+
+    for (unsigned int row = 0; row < height; ++row)
+    {
+        unsigned char spriteByte = cpu->memory[cpu->I + row];
+
+        for (unsigned int col = 0; col < 8; ++col)
+        {
+            unsigned char spritePixel = spriteByte & (0x80u >> col);
+            unsigned int *screenPixel = &cpu->gfx[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
+
+            if (spritePixel)
+            {
+                if (*screenPixel == 0xFFFFFFFF)
+                {
+                    cpu->V[0xF] = 1;
+                }
+
+                *screenPixel ^= 0xFFFFFFFF;
+            }
+        }
+    }
 }
 
 void OP_Ex9E(CPU *cpu) // SKP Vx
