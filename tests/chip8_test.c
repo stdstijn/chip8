@@ -10,16 +10,19 @@ void tearDown(void)
 {
 }
 
-void chip8_InitialTest_ThatIsEmpty_DoesPass(void)
+void chip8_Chip8CreateTest_WithReferenceToEmptyCPU_InitializesCPU(void)
 {
-    TEST_PASS();
+    CPU chip8 = {0};
+    Chip8_Create(&chip8);
+
+    TEST_ASSERT_EQUAL_UINT16(0x200, chip8.pc);
 }
 
 int main(int argc, char* argv[])
 {
     UNITY_BEGIN();
 
-    RUN_TEST(chip8_InitialTest_ThatIsEmpty_DoesPass);
+    RUN_TEST(chip8_Chip8CreateTest_WithReferenceToEmptyCPU_InitializesCPU);
 
     return UNITY_END();
 }
