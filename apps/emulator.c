@@ -16,14 +16,14 @@ int PlatformProcessInput(uint8_t *keys);
 
 int main(int argc, char *argv[])
 {
-    if (argc != 4)
+    if (argc != 2)
     {
-        SDL_Log("Usage: %s <Scale> <ROM>\n", argv[0]);
+        SDL_Log("Usage: %s <ROM>\n", argv[0]);
         return 1;
     }
 
-    int videoScale = SDL_atoi(argv[1]);
-    char const *romFilename = argv[3];
+    int videoScale = 10;
+    char const *romFilename = argv[1];
 
     Platform plat = {0};
     PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH * videoScale, VIDEO_HEIGHT * videoScale, VIDEO_WIDTH, VIDEO_HEIGHT);
@@ -35,7 +35,7 @@ int main(int argc, char *argv[])
 
     if (!fp)
     {
-        SDL_Log("emu: could not open ROM: %s", romFilename);
+        SDL_Log("emulator could not open ROM: %s", romFilename);
         return 1;
     }
 
