@@ -12,7 +12,7 @@ void tearDown(void)
 
 void chip8_Chip8CreateTest_WithReferenceToEmptyCPU_InitializesCPU(void)
 {
-    CPU chip8 = {0};
+    CPU chip8 = { 0 };
     Chip8_Create(&chip8);
 
     TEST_ASSERT_EQUAL_UINT16(0x200, chip8.pc);

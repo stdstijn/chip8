@@ -4,17 +4,17 @@
 
 typedef struct Platform
 {
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_Texture *texture;
+    SDL_Window* window;
+    SDL_Renderer* renderer;
+    SDL_Texture* texture;
 } Platform;
 
-void PlatformCreate(Platform *p, char const *title, int windowWidth, int windowHeight, int textureWidth, int textureHeight);
-void PlatformDestroy(Platform *p);
-void PlatformUpdate(Platform *p, void const *buffer, int pitch);
-int PlatformProcessInput(uint8_t *keys);
+void PlatformCreate(Platform* p, const char* title, int windowWidth, int windowHeight, int textureWidth, int textureHeight);
+void PlatformDestroy(Platform* p);
+void PlatformUpdate(Platform* p, const void* buffer, int pitch);
+int PlatformProcessInput(uint8_t* keys);
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     if (argc != 2)
     {
@@ -23,15 +23,15 @@ int main(int argc, char *argv[])
     }
 
     int videoScale = 10;
-    char const *romFilename = argv[1];
+    const char* romFilename = argv[1];
 
-    Platform plat = {0};
+    Platform plat = { 0 };
     PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH * videoScale, VIDEO_HEIGHT * videoScale, VIDEO_WIDTH, VIDEO_HEIGHT);
 
-    CPU chip8 = {0};
+    CPU chip8 = { 0 };
     Chip8_Create(&chip8);
 
-    SDL_RWops *fp = SDL_RWFromFile(romFilename, "rb");
+    SDL_RWops* fp = SDL_RWFromFile(romFilename, "rb");
 
     if (!fp)
     {
@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
         quit = PlatformProcessInput(chip8.key);
 
         Chip8_Cycle(&chip8);
-        
+
         PlatformUpdate(&plat, chip8.gfx, videoPitch);
 
         uint32_t frameNow = SDL_GetTicks();
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-void PlatformCreate(Platform *p, char const *title, int windowWidth, int windowHeight, int textureWidth, int textureHeight)
+void PlatformCreate(Platform* p, const char* title, int windowWidth, int windowHeight, int textureWidth, int textureHeight)
 {
     SDL_Init(SDL_INIT_VIDEO);
 
@@ -83,7 +83,7 @@ void PlatformCreate(Platform *p, char const *title, int windowWidth, int windowH
     p->texture = SDL_CreateTexture(p->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, textureWidth, textureHeight);
 }
 
-void PlatformDestroy(Platform *p)
+void PlatformDestroy(Platform* p)
 {
     SDL_DestroyWindow(p->window);
     SDL_DestroyRenderer(p->renderer);
@@ -91,7 +91,7 @@ void PlatformDestroy(Platform *p)
     SDL_Quit();
 }
 
-void PlatformUpdate(Platform *p, void const *buffer, int pitch)
+void PlatformUpdate(Platform* p, const void* buffer, int pitch)
 {
     SDL_UpdateTexture(p->texture, NULL, buffer, pitch);
     SDL_RenderClear(p->renderer);
@@ -99,7 +99,7 @@ void PlatformUpdate(Platform *p, void const *buffer, int pitch)
     SDL_RenderPresent(p->renderer);
 }
 
-int PlatformProcessInput(uint8_t *keys)
+int PlatformProcessInput(uint8_t* keys)
 {
     int quit = 0;
 
