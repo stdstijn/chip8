@@ -1,6 +1,6 @@
 #include "chip8/chip8.h"
 
-static const uint8_t fontset[] = {
+static const uint8_t fontset[FONT_SIZE] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -135,7 +135,7 @@ void Chip8_Create(CPU *cpu)
     cpu->pc = START_ADDRESS;
 
     // Load fontset
-    copyMemory(&cpu->memory[FONTSET_ADDRESS], fontset, 0x50);
+    copyMemory(&cpu->memory[FONTSET_ADDRESS], fontset, FONT_SIZE);
 
     // Set subtable function pointers to OP_0nnn initially
     nullOpcodetablePointers(cpu->subtable0, 0xE + 1);

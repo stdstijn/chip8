@@ -19,6 +19,7 @@ typedef enum VirtualMachineDescription
     KEY_COUNT = 16,
     VIDEO_WIDTH = 64,
     VIDEO_HEIGHT = 32,
+    FONT_SIZE = 80
 } VirtualMachineDescription;
 
 struct CPU
