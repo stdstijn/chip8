@@ -247,10 +247,13 @@ void OP_00E0(CPU *cpu) // CLS
 
 void OP_00EE(CPU *cpu) // RET
 {
+    cpu->sp -= 1;
+    cpu->pc = cpu->stack[cpu->pc];
 }
 
 void OP_0nnn(CPU *cpu) // SYS addr
 {
+    (void)cpu
 }
 
 void OP_1nnn(CPU *cpu) // JMP addr
