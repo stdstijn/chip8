@@ -21,82 +21,82 @@ static const uint8_t fontset[FONT_SIZE] = {
 
 static void dispatcher0(CPU *cpu)
 {
-    (*(cpu->subtable0[cpu->opcode & 0x000Fu]))(cpu);
+    (*(cpu->table0[cpu->opcode & 0x000Fu]))(cpu);
 }
 
 static void dispatcher1(CPU *cpu)
 {
-    (*(cpu->subtable1[0x0]))(cpu);
+    (*(cpu->table1[0x0]))(cpu);
 }
 
 static void dispatcher2(CPU *cpu)
 {
-    (*(cpu->subtable2[0x0]))(cpu);
+    (*(cpu->table2[0x0]))(cpu);
 }
 
 static void dispatcher3(CPU *cpu)
 {
-    (*(cpu->subtable3[0x0]))(cpu);
+    (*(cpu->table3[0x0]))(cpu);
 }
 
 static void dispatcher4(CPU *cpu)
 {
-    (*(cpu->subtable4[0x0]))(cpu);
+    (*(cpu->table4[0x0]))(cpu);
 }
 
 static void dispatcher5(CPU *cpu)
 {
-    (*(cpu->subtable5[0x0]))(cpu);
+    (*(cpu->table5[0x0]))(cpu);
 }
 
 static void dispatcher6(CPU *cpu)
 {
-    (*(cpu->subtable6[0x0]))(cpu);
+    (*(cpu->table6[0x0]))(cpu);
 }
 
 static void dispatcher7(CPU *cpu)
 {
-    (*(cpu->subtable7[0x0]))(cpu);
+    (*(cpu->table7[0x0]))(cpu);
 }
 
 static void dispatcher8(CPU *cpu)
 {
-    (*(cpu->subtable8[cpu->opcode & 0x000Fu]))(cpu);
+    (*(cpu->table8[cpu->opcode & 0x000Fu]))(cpu);
 }
 
 static void dispatcher9(CPU *cpu)
 {
-    (*(cpu->subtable9[0x0]))(cpu);
+    (*(cpu->table9[0x0]))(cpu);
 }
 
 static void dispatcherA(CPU *cpu)
 {
-    (*(cpu->subtableA[0x0]))(cpu);
+    (*(cpu->tableA[0x0]))(cpu);
 }
 
 static void dispatcherB(CPU *cpu)
 {
-    (*(cpu->subtableB[0x0]))(cpu);
+    (*(cpu->tableB[0x0]))(cpu);
 }
 
 static void dispatcherC(CPU *cpu)
 {
-    (*(cpu->subtableC[0x0]))(cpu);
+    (*(cpu->tableC[0x0]))(cpu);
 }
 
 static void dispatcherD(CPU *cpu)
 {
-    (*(cpu->subtableD[0x0]))(cpu);
+    (*(cpu->tableD[0x0]))(cpu);
 }
 
 static void dispatcherE(CPU *cpu)
 {
-    (*(cpu->subtableE[cpu->opcode & 0x000Fu]))(cpu);
+    (*(cpu->tableE[cpu->opcode & 0x000Fu]))(cpu);
 }
 
 static void dispatcherF(CPU *cpu)
 {
-    (*(cpu->subtableF[cpu->opcode & 0x00FFu]))(cpu);
+    (*(cpu->tableF[cpu->opcode & 0x00FFu]))(cpu);
 }
 
 static void clearMemory(void *ptr, size_t num)
@@ -120,11 +120,11 @@ static void copyMemory(void *dest, const void *src, size_t num)
     }
 }
 
-static void nullOpcodetablePointers(OpcodeFunc dispatcher[], size_t num)
+static void initOpcodeTable(OpcodeFunc table[], size_t num)
 {
     for (size_t i = 0; i < num; i++)
     {
-        dispatcher[i] = OP_0nnn;
+        table[i] = OP_0nnn;
     }
 }
 
@@ -137,77 +137,77 @@ void Chip8_Create(CPU *cpu)
     // Load fontset
     copyMemory(&cpu->memory[FONTSET_ADDRESS], fontset, FONT_SIZE);
 
-    // Set subtable function pointers to OP_0nnn initially
-    nullOpcodetablePointers(cpu->subtable0, 0xE + 1);
-    nullOpcodetablePointers(cpu->subtable1, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtable2, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtable3, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtable4, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtable5, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtable6, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtable7, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtable8, 0xE + 1);
-    nullOpcodetablePointers(cpu->subtable9, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtableA, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtableB, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtableC, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtableD, 0x0 + 1);
-    nullOpcodetablePointers(cpu->subtableE, 0xE + 1);
-    nullOpcodetablePointers(cpu->subtableF, 0x65 + 1);
+    // Setup dispatcher function pointers
+    cpu->dispatcher[0x0] = dispatcher0;
+    cpu->dispatcher[0x1] = dispatcher1;
+    cpu->dispatcher[0x2] = dispatcher2;
+    cpu->dispatcher[0x3] = dispatcher3;
+    cpu->dispatcher[0x4] = dispatcher4;
+    cpu->dispatcher[0x5] = dispatcher5;
+    cpu->dispatcher[0x6] = dispatcher6;
+    cpu->dispatcher[0x7] = dispatcher7;
+    cpu->dispatcher[0x8] = dispatcher8;
+    cpu->dispatcher[0x9] = dispatcher9;
+    cpu->dispatcher[0xA] = dispatcherA;
+    cpu->dispatcher[0xB] = dispatcherB;
+    cpu->dispatcher[0xC] = dispatcherC;
+    cpu->dispatcher[0xD] = dispatcherD;
+    cpu->dispatcher[0xE] = dispatcherE;
+    cpu->dispatcher[0xF] = dispatcherF;
 
-    // Setup opcode function pointer table
-    cpu->opcodetable[0x0] = dispatcher0;
-    cpu->opcodetable[0x1] = dispatcher1;
-    cpu->opcodetable[0x2] = dispatcher2;
-    cpu->opcodetable[0x3] = dispatcher3;
-    cpu->opcodetable[0x4] = dispatcher4;
-    cpu->opcodetable[0x5] = dispatcher5;
-    cpu->opcodetable[0x6] = dispatcher6;
-    cpu->opcodetable[0x7] = dispatcher7;
-    cpu->opcodetable[0x8] = dispatcher8;
-    cpu->opcodetable[0x9] = dispatcher9;
-    cpu->opcodetable[0xA] = dispatcherA;
-    cpu->opcodetable[0xB] = dispatcherB;
-    cpu->opcodetable[0xC] = dispatcherC;
-    cpu->opcodetable[0xD] = dispatcherD;
-    cpu->opcodetable[0xE] = dispatcherE;
-    cpu->opcodetable[0xF] = dispatcherF;
+    // Set opcode table function pointers to OP_0nnn initially
+    initOpcodeTable(cpu->table0, sizeof(cpu->table0) / sizeof(cpu->table0[0]));
+    initOpcodeTable(cpu->table1, sizeof(cpu->table1) / sizeof(cpu->table1[0]));
+    initOpcodeTable(cpu->table2, sizeof(cpu->table2) / sizeof(cpu->table2[0]));
+    initOpcodeTable(cpu->table3, sizeof(cpu->table3) / sizeof(cpu->table3[0]));
+    initOpcodeTable(cpu->table4, sizeof(cpu->table4) / sizeof(cpu->table4[0]));
+    initOpcodeTable(cpu->table5, sizeof(cpu->table5) / sizeof(cpu->table5[0]));
+    initOpcodeTable(cpu->table6, sizeof(cpu->table6) / sizeof(cpu->table6[0]));
+    initOpcodeTable(cpu->table7, sizeof(cpu->table7) / sizeof(cpu->table7[0]));
+    initOpcodeTable(cpu->table8, sizeof(cpu->table8) / sizeof(cpu->table8[0]));
+    initOpcodeTable(cpu->table9, sizeof(cpu->table9) / sizeof(cpu->table9[0]));
+    initOpcodeTable(cpu->tableA, sizeof(cpu->tableA) / sizeof(cpu->tableA[0]));
+    initOpcodeTable(cpu->tableB, sizeof(cpu->tableB) / sizeof(cpu->tableB[0]));
+    initOpcodeTable(cpu->tableC, sizeof(cpu->tableC) / sizeof(cpu->tableC[0]));
+    initOpcodeTable(cpu->tableD, sizeof(cpu->tableD) / sizeof(cpu->tableD[0]));
+    initOpcodeTable(cpu->tableE, sizeof(cpu->tableE) / sizeof(cpu->tableE[0]));
+    initOpcodeTable(cpu->tableF, sizeof(cpu->tableF) / sizeof(cpu->tableF[0]));
 
-    // Populate dispatcher function pointer arrays
-    cpu->subtable0[0x0] = OP_00E0;
-    cpu->subtable0[0xE] = OP_00EE;
-    cpu->subtable1[0x0] = OP_1nnn;
-    cpu->subtable2[0x0] = OP_2nnn;
-    cpu->subtable3[0x0] = OP_3xkk;
-    cpu->subtable4[0x0] = OP_4xkk;
-    cpu->subtable5[0x0] = OP_5xy0;
-    cpu->subtable6[0x0] = OP_6xkk;
-    cpu->subtable7[0x0] = OP_7xkk;
-    cpu->subtable8[0x0] = OP_8xy0;
-    cpu->subtable8[0x1] = OP_8xy1;
-    cpu->subtable8[0x2] = OP_8xy2;
-    cpu->subtable8[0x3] = OP_8xy3;
-    cpu->subtable8[0x4] = OP_8xy4;
-    cpu->subtable8[0x5] = OP_8xy5;
-    cpu->subtable8[0x6] = OP_8xy6;
-    cpu->subtable8[0x7] = OP_8xy7;
-    cpu->subtable8[0xE] = OP_8xyE;
-    cpu->subtable9[0x0] = OP_9xy0;
-    cpu->subtableA[0x0] = OP_Annn;
-    cpu->subtableB[0x0] = OP_Bnnn;
-    cpu->subtableC[0x0] = OP_Cxkk;
-    cpu->subtableD[0x0] = OP_Dxyn;
-    cpu->subtableE[0xE] = OP_Ex9E;
-    cpu->subtableE[0x1] = OP_ExA1;
-    cpu->subtableF[0x07] = OP_Fx07;
-    cpu->subtableF[0x0A] = OP_Fx0A;
-    cpu->subtableF[0x15] = OP_Fx15;
-    cpu->subtableF[0x18] = OP_Fx18;
-    cpu->subtableF[0x1E] = OP_Fx1E;
-    cpu->subtableF[0x29] = OP_Fx29;
-    cpu->subtableF[0x33] = OP_Fx33;
-    cpu->subtableF[0x55] = OP_Fx55;
-    cpu->subtableF[0x65] = OP_Fx65;
+    // Populate opcode table function pointers with corresponding functions
+    cpu->table0[0x0] = OP_00E0;
+    cpu->table0[0xE] = OP_00EE;
+    cpu->table1[0x0] = OP_1nnn;
+    cpu->table2[0x0] = OP_2nnn;
+    cpu->table3[0x0] = OP_3xkk;
+    cpu->table4[0x0] = OP_4xkk;
+    cpu->table5[0x0] = OP_5xy0;
+    cpu->table6[0x0] = OP_6xkk;
+    cpu->table7[0x0] = OP_7xkk;
+    cpu->table8[0x0] = OP_8xy0;
+    cpu->table8[0x1] = OP_8xy1;
+    cpu->table8[0x2] = OP_8xy2;
+    cpu->table8[0x3] = OP_8xy3;
+    cpu->table8[0x4] = OP_8xy4;
+    cpu->table8[0x5] = OP_8xy5;
+    cpu->table8[0x6] = OP_8xy6;
+    cpu->table8[0x7] = OP_8xy7;
+    cpu->table8[0xE] = OP_8xyE;
+    cpu->table9[0x0] = OP_9xy0;
+    cpu->tableA[0x0] = OP_Annn;
+    cpu->tableB[0x0] = OP_Bnnn;
+    cpu->tableC[0x0] = OP_Cxkk;
+    cpu->tableD[0x0] = OP_Dxyn;
+    cpu->tableE[0xE] = OP_Ex9E;
+    cpu->tableE[0x1] = OP_ExA1;
+    cpu->tableF[0x07] = OP_Fx07;
+    cpu->tableF[0x0A] = OP_Fx0A;
+    cpu->tableF[0x15] = OP_Fx15;
+    cpu->tableF[0x18] = OP_Fx18;
+    cpu->tableF[0x1E] = OP_Fx1E;
+    cpu->tableF[0x29] = OP_Fx29;
+    cpu->tableF[0x33] = OP_Fx33;
+    cpu->tableF[0x55] = OP_Fx55;
+    cpu->tableF[0x65] = OP_Fx65;
 }
 
 void Chip8_Cycle(CPU *cpu)
@@ -222,7 +222,7 @@ void Chip8_Cycle(CPU *cpu)
     uint8_t nibble = (cpu->opcode & 0xF000u) >> 12u;
 
     // Execute opcode
-    (*(cpu->opcodetable[nibble]))(cpu);
+    (*(cpu->dispatcher[nibble]))(cpu);
 
     // Update timers
     if (cpu->delaytimer > 0)
@@ -237,7 +237,6 @@ void Chip8_Cycle(CPU *cpu)
 
 void Chip8_Destroy(CPU *cpu)
 {
-    // Clean registers and memory once
     (void)cpu;
 }
 
