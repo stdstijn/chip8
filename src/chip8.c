@@ -225,14 +225,8 @@ void Chip8_Cycle(CPU* cpu)
     (*(cpu->dispatcher[nibble]))(cpu);
 
     // Update timers
-    if (cpu->delaytimer > 0)
-    {
-        cpu->delaytimer -= 1;
-    }
-    if (cpu->soundtimer > 0)
-    {
-        cpu->soundtimer -= 1;
-    }
+    if (cpu->delaytimer > 0) cpu->delaytimer -= 1;
+    if (cpu->soundtimer > 0) cpu->soundtimer -= 1;
 }
 
 void Chip8_Destroy(CPU* cpu)
@@ -264,18 +258,31 @@ void OP_1nnn(CPU* cpu) // JMP addr
 
 void OP_2nnn(CPU* cpu) // CALL addr
 {
+    uint16_t address = cpu->opcode & 0x0FFFu;
+    cpu->stack[cpu->sp] = cpu->pc;
+    cpu->sp += 1;
+    cpu->pc = address;
 }
 
 void OP_3xkk(CPU* cpu) // SE Vx, byte
 {
+    uint8_t Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t byte = cpu->opcode & 0x00FFu;
+    if (Vx == byte) cpu->pc += 2;
 }
 
 void OP_4xkk(CPU* cpu) // SNE Vx, byte
 {
+    uint8_t Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t byte = cpu->opcode & 0x00FFu;
+    if (Vx != byte) cpu->pc += 2;
 }
 
 void OP_5xy0(CPU* cpu) // SE Vx, Vy
 {
+    uint8_t Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (cpu->opcode & 0x00F0u) >> 8u;
+    if (Vx != Vy) cpu->pc += 2;
 }
 
 void OP_6xkk(CPU* cpu) // LD Vx, byte
