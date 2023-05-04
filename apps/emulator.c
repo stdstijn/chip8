@@ -1,6 +1,6 @@
 #include "chip8/chip8.h"
 
-#include <SDL2/SDL.h>
+#include "SDL.h"
 
 typedef struct Platform
 {
