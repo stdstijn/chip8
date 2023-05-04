@@ -1,6 +1,9 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
+#include <stdint.h>
+#include <stddef.h>
+
 typedef struct CPU CPU;
 typedef void (*OpcodeFunc)(CPU *);
 
@@ -20,17 +23,17 @@ typedef enum VirtualMachineDescription
 
 struct CPU
 {
-    unsigned char memory[MEMORY_SIZE];
-    unsigned char V[REGISTER_COUNT];
-    unsigned short I;
-    unsigned short pc;
-    unsigned short stack[STACK_LEVELS];
-    unsigned short sp;
-    unsigned short opcode;
-    unsigned char delaytimer;
-    unsigned char soundtimer;
-    unsigned char key[KEY_COUNT];
-    unsigned int gfx[VIDEO_WIDTH * VIDEO_HEIGHT];
+    uint8_t memory[MEMORY_SIZE];
+    uint8_t V[REGISTER_COUNT];
+    uint16_t I;
+    uint16_t pc;
+    uint16_t stack[STACK_LEVELS];
+    uint16_t sp;
+    uint16_t opcode;
+    uint8_t delaytimer;
+    uint8_t soundtimer;
+    uint8_t key[KEY_COUNT];
+    uint32_t gfx[VIDEO_WIDTH * VIDEO_HEIGHT];
 
     OpcodeFunc opcodetable[0xF + 1];
 

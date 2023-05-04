@@ -1,6 +1,6 @@
 #include "chip8/chip8.h"
 
-static const unsigned char fontset[] = {
+static const uint8_t fontset[] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -99,30 +99,30 @@ static void dispatcherF(CPU *cpu)
     (*(cpu->subtableF[cpu->opcode & 0x00FFu]))(cpu);
 }
 
-static void clearMemory(void *ptr, unsigned int num)
+static void clearMemory(void *ptr, size_t num)
 {
-    char *cptr = ptr;
+    uint8_t *cptr = ptr;
 
-    for (unsigned int i = 0; i < num; i++)
+    for (size_t i = 0; i < num; i++)
     {
         cptr[i] = 0;
     }
 }
 
-static void copyMemory(void *dest, const void *src, unsigned int num)
+static void copyMemory(void *dest, const void *src, size_t num)
 {
-    const char *csrc = src;
-    char *cdest = dest;
+    const uint8_t *csrc = src;
+    uint8_t *cdest = dest;
 
-    for (unsigned int i = 0; i < num; i++)
+    for (size_t i = 0; i < num; i++)
     {
         cdest[i] = csrc[i];
     }
 }
 
-static void nullOpcodetablePointers(OpcodeFunc dispatcher[], unsigned int num)
+static void nullOpcodetablePointers(OpcodeFunc dispatcher[], size_t num)
 {
-    for (unsigned int i = 0; i < num; i++)
+    for (size_t i = 0; i < num; i++)
     {
         dispatcher[i] = OP_0nnn;
     }
@@ -219,7 +219,7 @@ void Chip8_Cycle(CPU *cpu)
     cpu->pc += 2;
 
     // Decode opcode
-    unsigned char nibble = (cpu->opcode & 0xF000u) >> 12u;
+    uint8_t nibble = (cpu->opcode & 0xF000u) >> 12u;
 
     // Execute opcode
     (*(cpu->opcodetable[nibble]))(cpu);
@@ -256,7 +256,7 @@ void OP_0nnn(CPU *cpu) // SYS addr
 
 void OP_1nnn(CPU *cpu) // JMP addr
 {
-    unsigned short address = cpu->opcode & 0x0FFFu;
+    uint16_t address = cpu->opcode & 0x0FFFu;
     cpu->pc = address;
 }
 
@@ -278,15 +278,15 @@ void OP_5xy0(CPU *cpu) // SE Vx, Vy
 
 void OP_6xkk(CPU *cpu) // LD Vx, byte
 {
-    unsigned char Vx = (cpu->opcode & 0x0F00u) >> 8u;
-    unsigned char byte = cpu->opcode & 0x00FFu;
+    uint8_t Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t byte = cpu->opcode & 0x00FFu;
     cpu->V[Vx] = byte;
 }
 
 void OP_7xkk(CPU *cpu) // ADD Vx, byte
 {
-    unsigned char Vx = (cpu->opcode & 0x0F00u) >> 8u;
-    unsigned char byte = cpu->opcode & 0x00FFu;
+    uint8_t Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t byte = cpu->opcode & 0x00FFu;
     cpu->V[Vx] += byte;
 }
 
@@ -332,7 +332,7 @@ void OP_9xy0(CPU *cpu) // SNE Vx, Vy
 
 void OP_Annn(CPU *cpu) // LD I, addr
 {
-    unsigned short address = cpu->opcode & 0x0FFFu;
+    uint16_t address = cpu->opcode & 0x0FFFu;
     cpu->I = address;
 }
 
@@ -346,33 +346,33 @@ void OP_Cxkk(CPU *cpu) // RND Vx, byte
 
 void OP_Dxyn(CPU *cpu) // DRW Vx, Vy, nibble
 {
-    unsigned char Vx = (cpu->opcode & 0x0F00u) >> 8u;
-    unsigned char Vy = (cpu->opcode & 0x00F0u) >> 4u;
-    unsigned char height = cpu->opcode & 0x000Fu;
+    uint8_t Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t Vy = (cpu->opcode & 0x00F0u) >> 4u;
+    uint8_t height = cpu->opcode & 0x000Fu;
 
     // Wrap if going beyond screen boundaries
-    unsigned char xPos = cpu->V[Vx] % VIDEO_WIDTH;
-    unsigned char yPos = cpu->V[Vy] % VIDEO_HEIGHT;
+    uint8_t xPos = cpu->V[Vx] % VIDEO_WIDTH;
+    uint8_t yPos = cpu->V[Vy] % VIDEO_HEIGHT;
 
     cpu->V[0xF] = 0;
 
-    for (unsigned int row = 0; row < height; ++row)
+    for (size_t row = 0; row < height; ++row)
     {
-        unsigned char spriteByte = cpu->memory[cpu->I + row];
+        uint8_t spriteByte = cpu->memory[cpu->I + row];
 
-        for (unsigned int col = 0; col < 8; ++col)
+        for (size_t col = 0; col < 8; ++col)
         {
-            unsigned char spritePixel = spriteByte & (0x80u >> col);
-            unsigned int *screenPixel = &cpu->gfx[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
+            uint8_t spritePixel = spriteByte & (0x80u >> col);
+            uint32_t *screenPixel = &cpu->gfx[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
 
             if (spritePixel)
             {
-                if (*screenPixel == 0xFFFFFFFF)
+                if (*screenPixel == 0xFFFFFFFFu)
                 {
                     cpu->V[0xF] = 1;
                 }
 
-                *screenPixel ^= 0xFFFFFFFF;
+                *screenPixel ^= 0xFFFFFFFFu;
             }
         }
     }
