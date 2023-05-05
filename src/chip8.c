@@ -224,8 +224,10 @@ void Chip8_Cycle(CPU* cpu)
     // Execute opcode
     (*(cpu->dispatcher[nibble]))(cpu);
 
-    // Update timers
+    // Update delay timer if it has been set
     if (cpu->delaytimer > 0) cpu->delaytimer -= 1;
+
+    // Update sound timer if it has been set
     if (cpu->soundtimer > 0) cpu->soundtimer -= 1;
 }
 
@@ -242,7 +244,7 @@ void OP_00E0(CPU* cpu) // CLS
 void OP_00EE(CPU* cpu) // RET
 {
     cpu->sp -= 1;
-    cpu->pc = cpu->stack[cpu->pc];
+    cpu->pc = cpu->stack[cpu->sp];
 }
 
 void OP_0nnn(CPU* cpu) // SYS addr
@@ -282,7 +284,7 @@ void OP_5xy0(CPU* cpu) // SE Vx, Vy
 {
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
     uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
-    if (cpu->V[x] != cpu->V[y]) cpu->pc += 2;
+    if (cpu->V[x] == cpu->V[y]) cpu->pc += 2;
 }
 
 void OP_6xkk(CPU* cpu) // LD Vx, byte
