@@ -381,10 +381,27 @@ void OP_Annn(CPU* cpu) // LD I, addr
 
 void OP_Bnnn(CPU* cpu) // JP V0, addr
 {
+    uint16_t address = cpu->opcode & 0x0FFFu;
+    cpu->pc = address + cpu->V[0x0];
 }
 
 void OP_Cxkk(CPU* cpu) // RND Vx, byte
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t byte = cpu->opcode & 0x00FFu;
+
+    // Initial seed
+    static uint32_t seed = 0xB16B00B5u;
+
+    // LCG parameters
+    static const uint32_t a = 1103515245;
+    static const uint32_t c = 12345;
+    static const uint32_t m = 2147483648;
+
+    // Generate next pseudo random number
+    seed = (seed * a + c) % m;
+
+    cpu->V[x] = seed & byte;
 }
 
 void OP_Dxyn(CPU* cpu) // DRW Vx, Vy, nibble
