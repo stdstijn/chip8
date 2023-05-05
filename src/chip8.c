@@ -1,5 +1,22 @@
 #include "chip8/chip8.h"
 
+static void dispatcher0(CPU* cpu);
+static void dispatcher1(CPU* cpu);
+static void dispatcher2(CPU* cpu);
+static void dispatcher3(CPU* cpu);
+static void dispatcher4(CPU* cpu);
+static void dispatcher5(CPU* cpu);
+static void dispatcher6(CPU* cpu);
+static void dispatcher7(CPU* cpu);
+static void dispatcher8(CPU* cpu);
+static void dispatcher9(CPU* cpu);
+static void dispatcherA(CPU* cpu);
+static void dispatcherB(CPU* cpu);
+static void dispatcherC(CPU* cpu);
+static void dispatcherD(CPU* cpu);
+static void dispatcherE(CPU* cpu);
+static void dispatcherF(CPU* cpu);
+
 static const uint8_t fontset[FONT_SIZE] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -18,23 +35,6 @@ static const uint8_t fontset[FONT_SIZE] = {
     0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
-
-static void dispatcher0(CPU* cpu);
-static void dispatcher1(CPU* cpu);
-static void dispatcher2(CPU* cpu);
-static void dispatcher3(CPU* cpu);
-static void dispatcher4(CPU* cpu);
-static void dispatcher5(CPU* cpu);
-static void dispatcher6(CPU* cpu);
-static void dispatcher7(CPU* cpu);
-static void dispatcher8(CPU* cpu);
-static void dispatcher9(CPU* cpu);
-static void dispatcherA(CPU* cpu);
-static void dispatcherB(CPU* cpu);
-static void dispatcherC(CPU* cpu);
-static void dispatcherD(CPU* cpu);
-static void dispatcherE(CPU* cpu);
-static void dispatcherF(CPU* cpu);
 
 static void clearMemory(void* ptr, size_t num)
 {
