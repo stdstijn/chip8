@@ -457,6 +457,8 @@ void OP_ExA1(CPU* cpu) // SKNP Vx
 
 void OP_Fx07(CPU* cpu) // LD Vx, DT
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    cpu->V[x] = cpu->delaytimer;
 }
 
 void OP_Fx0A(CPU* cpu) // LD Vx, K
@@ -465,10 +467,14 @@ void OP_Fx0A(CPU* cpu) // LD Vx, K
 
 void OP_Fx15(CPU* cpu) // LD DT, Vx
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    cpu->delaytimer = cpu->V[x];
 }
 
 void OP_Fx18(CPU* cpu) // LD ST, Vx
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    cpu->soundtimer = cpu->V[x];
 }
 
 void OP_Fx1E(CPU* cpu) // ADD I, Vx
