@@ -85,9 +85,9 @@ void PlatformCreate(Platform* p, const char* title, int windowWidth, int windowH
 
 void PlatformDestroy(Platform* p)
 {
-    SDL_DestroyWindow(p->window);
-    SDL_DestroyRenderer(p->renderer);
     SDL_DestroyTexture(p->texture);
+    SDL_DestroyRenderer(p->renderer);
+    SDL_DestroyWindow(p->window);
     SDL_Quit();
 }
 
