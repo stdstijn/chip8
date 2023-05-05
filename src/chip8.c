@@ -443,10 +443,16 @@ void OP_Dxyn(CPU* cpu) // DRW Vx, Vy, nibble
 
 void OP_Ex9E(CPU* cpu) // SKP Vx
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t key = cpu->V[x];
+    if (cpu->key[key]) cpu->pc += 2;
 }
 
 void OP_ExA1(CPU* cpu) // SKNP Vx
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t key = cpu->V[x];
+    if (!cpu->key[key]) cpu->pc += 2;
 }
 
 void OP_Fx07(CPU* cpu) // LD Vx, DT
