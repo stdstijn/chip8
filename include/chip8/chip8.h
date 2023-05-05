@@ -7,7 +7,7 @@
 typedef struct CPU CPU;
 typedef void (*OpcodeFunc)(CPU*);
 
-typedef enum VirtualMachineDescription
+enum VirtualMachineDescription
 {
     MEMORY_SIZE = 0x1000,
     VIDEO_SIZE = 0x0800,
@@ -20,13 +20,13 @@ typedef enum VirtualMachineDescription
     VIDEO_WIDTH = 64,
     VIDEO_HEIGHT = 32,
     FONT_SIZE = 80
-} VirtualMachineDescription;
+};
 
 struct CPU
 {
     uint8_t memory[MEMORY_SIZE];
-    uint8_t V[REGISTER_COUNT];
-    uint16_t I;
+    uint8_t v[REGISTER_COUNT];
+    uint16_t i;
     uint16_t pc;
     uint16_t stack[STACK_LEVELS];
     uint16_t sp;
