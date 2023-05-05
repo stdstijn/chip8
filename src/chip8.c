@@ -19,85 +19,22 @@ static const uint8_t fontset[FONT_SIZE] = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-static void dispatcher0(CPU* cpu)
-{
-    (*(cpu->table0[cpu->opcode & 0x000Fu]))(cpu);
-}
-
-static void dispatcher1(CPU* cpu)
-{
-    (*(cpu->table1[0x0]))(cpu);
-}
-
-static void dispatcher2(CPU* cpu)
-{
-    (*(cpu->table2[0x0]))(cpu);
-}
-
-static void dispatcher3(CPU* cpu)
-{
-    (*(cpu->table3[0x0]))(cpu);
-}
-
-static void dispatcher4(CPU* cpu)
-{
-    (*(cpu->table4[0x0]))(cpu);
-}
-
-static void dispatcher5(CPU* cpu)
-{
-    (*(cpu->table5[0x0]))(cpu);
-}
-
-static void dispatcher6(CPU* cpu)
-{
-    (*(cpu->table6[0x0]))(cpu);
-}
-
-static void dispatcher7(CPU* cpu)
-{
-    (*(cpu->table7[0x0]))(cpu);
-}
-
-static void dispatcher8(CPU* cpu)
-{
-    (*(cpu->table8[cpu->opcode & 0x000Fu]))(cpu);
-}
-
-static void dispatcher9(CPU* cpu)
-{
-    (*(cpu->table9[0x0]))(cpu);
-}
-
-static void dispatcherA(CPU* cpu)
-{
-    (*(cpu->tableA[0x0]))(cpu);
-}
-
-static void dispatcherB(CPU* cpu)
-{
-    (*(cpu->tableB[0x0]))(cpu);
-}
-
-static void dispatcherC(CPU* cpu)
-{
-    (*(cpu->tableC[0x0]))(cpu);
-}
-
-static void dispatcherD(CPU* cpu)
-{
-    (*(cpu->tableD[0x0]))(cpu);
-}
-
-static void dispatcherE(CPU* cpu)
-{
-    (*(cpu->tableE[cpu->opcode & 0x000Fu]))(cpu);
-}
-
-static void dispatcherF(CPU* cpu)
-{
-    (*(cpu->tableF[cpu->opcode & 0x00FFu]))(cpu);
-}
+static void dispatcher0(CPU* cpu);
+static void dispatcher1(CPU* cpu);
+static void dispatcher2(CPU* cpu);
+static void dispatcher3(CPU* cpu);
+static void dispatcher4(CPU* cpu);
+static void dispatcher5(CPU* cpu);
+static void dispatcher6(CPU* cpu);
+static void dispatcher7(CPU* cpu);
+static void dispatcher8(CPU* cpu);
+static void dispatcher9(CPU* cpu);
+static void dispatcherA(CPU* cpu);
+static void dispatcherB(CPU* cpu);
+static void dispatcherC(CPU* cpu);
+static void dispatcherD(CPU* cpu);
+static void dispatcherE(CPU* cpu);
+static void dispatcherF(CPU* cpu);
 
 static void clearMemory(void* ptr, size_t num)
 {
@@ -514,4 +451,84 @@ void OP_Fx55(CPU* cpu) // LD [I], Vx
 
 void OP_Fx65(CPU* cpu) // LD Vx, [I]
 {
+}
+
+static void dispatcher0(CPU* cpu)
+{
+    (*(cpu->table0[cpu->opcode & 0x000Fu]))(cpu);
+}
+
+static void dispatcher1(CPU* cpu)
+{
+    (*(cpu->table1[0x0]))(cpu);
+}
+
+static void dispatcher2(CPU* cpu)
+{
+    (*(cpu->table2[0x0]))(cpu);
+}
+
+static void dispatcher3(CPU* cpu)
+{
+    (*(cpu->table3[0x0]))(cpu);
+}
+
+static void dispatcher4(CPU* cpu)
+{
+    (*(cpu->table4[0x0]))(cpu);
+}
+
+static void dispatcher5(CPU* cpu)
+{
+    (*(cpu->table5[0x0]))(cpu);
+}
+
+static void dispatcher6(CPU* cpu)
+{
+    (*(cpu->table6[0x0]))(cpu);
+}
+
+static void dispatcher7(CPU* cpu)
+{
+    (*(cpu->table7[0x0]))(cpu);
+}
+
+static void dispatcher8(CPU* cpu)
+{
+    (*(cpu->table8[cpu->opcode & 0x000Fu]))(cpu);
+}
+
+static void dispatcher9(CPU* cpu)
+{
+    (*(cpu->table9[0x0]))(cpu);
+}
+
+static void dispatcherA(CPU* cpu)
+{
+    (*(cpu->tableA[0x0]))(cpu);
+}
+
+static void dispatcherB(CPU* cpu)
+{
+    (*(cpu->tableB[0x0]))(cpu);
+}
+
+static void dispatcherC(CPU* cpu)
+{
+    (*(cpu->tableC[0x0]))(cpu);
+}
+
+static void dispatcherD(CPU* cpu)
+{
+    (*(cpu->tableD[0x0]))(cpu);
+}
+
+static void dispatcherE(CPU* cpu)
+{
+    (*(cpu->tableE[cpu->opcode & 0x000Fu]))(cpu);
+}
+
+static void dispatcherF(CPU* cpu)
+{
+    (*(cpu->tableF[cpu->opcode & 0x00FFu]))(cpu);
 }
