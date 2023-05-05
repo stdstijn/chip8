@@ -45,7 +45,7 @@ void Chip8_Create(CPU* cpu)
     assignOpcodeTableFunctions(cpu);
 }
 
-void Chip8_Cycle(CPU* cpu)
+void Chip8_Cycle(CPU* cpu, uint32_t time)
 {
     // Fetch opcode
     cpu->opcode = (cpu->memory[cpu->pc] << 8u) | cpu->memory[cpu->pc + 1];
@@ -59,11 +59,22 @@ void Chip8_Cycle(CPU* cpu)
     // Execute opcode
     (*(cpu->dispatcher[nibble]))(cpu);
 
-    // Update delay timer if it has been set
-    if (cpu->delaytimer > 0) cpu->delaytimer -= 1;
+    static uint32_t lastTimerUpdate = 0;
 
-    // Update sound timer if it has been set
-    if (cpu->soundtimer > 0) cpu->soundtimer -= 1;
+    // Update timers when time of one clock cycle has passed
+    if (time - lastTimerUpdate >= 1000.0 / CLOCK_HZ + 0.5)
+    {
+        if (cpu->delaytimer > 0)
+        {
+            cpu->delaytimer -= 1;
+        }
+        if (cpu->soundtimer > 0) 
+        {
+            cpu->soundtimer -= 1;
+        }
+
+        lastTimerUpdate = time;
+    }
 }
 
 void Chip8_Destroy(CPU* cpu)

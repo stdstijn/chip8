@@ -1,8 +1,9 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
-#include <stdint.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
 
 typedef struct CPU CPU;
 typedef void (*OpcodeFunc)(CPU*);
@@ -78,7 +79,7 @@ static const uint8_t fontset[FONT_SIZE] = {
 void Chip8_Create(CPU* cpu);
 void Chip8_Destroy(CPU* cpu);
 
-void Chip8_Cycle(CPU* cpu);
+void Chip8_Cycle(CPU* cpu, uint32_t time);
 
 void OP_00E0(CPU* cpu); // CLS
 void OP_00EE(CPU* cpu); // RET

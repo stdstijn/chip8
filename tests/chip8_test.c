@@ -273,7 +273,7 @@ void chip8_OpFx65_OpcodeTest_AllFunctionalityCorrect(void)
     TEST_IGNORE();
 }
 
-int main(int argc, char* argv[])
+int main(void)
 {
     UNITY_BEGIN();
 
