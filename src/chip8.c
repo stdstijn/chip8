@@ -266,77 +266,111 @@ void OP_2nnn(CPU* cpu) // CALL addr
 
 void OP_3xkk(CPU* cpu) // SE Vx, byte
 {
-    uint8_t Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
     uint8_t byte = cpu->opcode & 0x00FFu;
-    if (Vx == byte) cpu->pc += 2;
+    if (cpu->V[x] == byte) cpu->pc += 2;
 }
 
 void OP_4xkk(CPU* cpu) // SNE Vx, byte
 {
-    uint8_t Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
     uint8_t byte = cpu->opcode & 0x00FFu;
-    if (Vx != byte) cpu->pc += 2;
+    if (cpu->V[x] != byte) cpu->pc += 2;
 }
 
 void OP_5xy0(CPU* cpu) // SE Vx, Vy
 {
-    uint8_t Vx = (cpu->opcode & 0x0F00u) >> 8u;
-    uint8_t Vy = (cpu->opcode & 0x00F0u) >> 8u;
-    if (Vx != Vy) cpu->pc += 2;
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+    if (cpu->V[x] != cpu->V[y]) cpu->pc += 2;
 }
 
 void OP_6xkk(CPU* cpu) // LD Vx, byte
 {
-    uint8_t Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
     uint8_t byte = cpu->opcode & 0x00FFu;
-    cpu->V[Vx] = byte;
+    cpu->V[x] = byte;
 }
 
 void OP_7xkk(CPU* cpu) // ADD Vx, byte
 {
-    uint8_t Vx = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
     uint8_t byte = cpu->opcode & 0x00FFu;
-    cpu->V[Vx] += byte;
+    cpu->V[x] += byte;
 }
 
 void OP_8xy0(CPU* cpu) // LD Vx, Vy
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+    cpu->V[x] = cpu->V[y];
 }
 
 void OP_8xy1(CPU* cpu) // OR Vx, Vy
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+    cpu->V[x] |= cpu->V[y];
 }
 
 void OP_8xy2(CPU* cpu) // AND Vx, Vy
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+    cpu->V[x] &= cpu->V[y];
 }
 
 void OP_8xy3(CPU* cpu) // XOR Vx, Vy
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+    cpu->V[x] ^= cpu->V[y];
 }
 
 void OP_8xy4(CPU* cpu) // ADD Vx, Vy
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+    uint16_t sum = cpu->V[x] + cpu->V[y];
+    cpu->V[0xF] = (sum > 255u) ? 1 : 0;
+    cpu->V[x] = sum & 0xFFu;
 }
 
 void OP_8xy5(CPU* cpu) // SUB Vx, Vy
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+    cpu->V[0xF] = (cpu->V[x] > cpu->V[y]) ? 1 : 0;
+    cpu->V[x] -= cpu->V[y];
 }
 
 void OP_8xy6(CPU* cpu) // SHR Vx {, Vy}
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    cpu->V[0xF] = (cpu->V[x] & 0x01u);
+    cpu->V[x] >>= 1;
 }
 
 void OP_8xy7(CPU* cpu) // SUBN Vx, Vy
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+    cpu->V[0xF] = (cpu->V[y] > cpu->V[x]) ? 1 : 0;
+    cpu->V[x] = cpu->V[y] - cpu->V[x];
 }
 
 void OP_8xyE(CPU* cpu) // SHL Vx {, Vy}
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    cpu->V[0xF] = (cpu->V[x] & 0x80u) >> 7u;
+    cpu->V[x] <<= 1;
 }
 
 void OP_9xy0(CPU* cpu) // SNE Vx, Vy
 {
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+    if (cpu->V[x] != cpu->V[y]) cpu->pc += 2;
 }
 
 void OP_Annn(CPU* cpu) // LD I, addr
@@ -360,19 +394,20 @@ void OP_Dxyn(CPU* cpu) // DRW Vx, Vy, nibble
     uint8_t height = cpu->opcode & 0x000Fu;
 
     // Wrap if going beyond screen boundaries
-    uint8_t xPos = cpu->V[Vx] % VIDEO_WIDTH;
-    uint8_t yPos = cpu->V[Vy] % VIDEO_HEIGHT;
+    uint8_t x = cpu->V[Vx] % VIDEO_WIDTH;
+    uint8_t y = cpu->V[Vy] % VIDEO_HEIGHT;
 
     cpu->V[0xF] = 0;
 
-    for (size_t row = 0; row < height; ++row)
+    for (size_t row = 0; row < height; row++)
     {
         uint8_t spriteByte = cpu->memory[cpu->I + row];
 
-        for (size_t col = 0; col < 8; ++col)
+        for (size_t col = 0; col < 8; col++)
         {
             uint8_t spritePixel = spriteByte & (0x80u >> col);
-            uint32_t* screenPixel = &cpu->gfx[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
+            uint32_t screenIndex = (y + row) * VIDEO_WIDTH + (x + col);
+            uint32_t* screenPixel = &cpu->gfx[screenIndex];
 
             if (spritePixel)
             {
