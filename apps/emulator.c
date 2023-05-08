@@ -56,7 +56,14 @@ int main(int argc, char* argv[])
 
         Chip8_Cycle(&chip8, time);
 
-        PlatformUpdate(&plat, chip8.gfx, videoPitch);
+        static uint32_t lastPlatformUpdate = 0;
+
+        if (time - lastPlatformUpdate >= 1000.0 / CLOCK_HZ + 0.5)
+        {
+            PlatformUpdate(&plat, chip8.gfx, videoPitch);
+
+            lastPlatformUpdate = time;
+        }
     }
 
     PlatformDestroy(&plat);
