@@ -25,12 +25,6 @@ int main(int argc, char* argv[])
     int videoScale = 10;
     const char* romFilename = argv[1];
 
-    Platform plat = { 0 };
-    PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH * videoScale, VIDEO_HEIGHT * videoScale, VIDEO_WIDTH, VIDEO_HEIGHT);
-
-    CPU chip8 = { 0 };
-    Chip8_Create(&chip8);
-
     SDL_RWops* fp = SDL_RWFromFile(romFilename, "rb");
 
     if (!fp)
@@ -38,6 +32,12 @@ int main(int argc, char* argv[])
         SDL_Log("emulator could not open ROM: %s", romFilename);
         return 1;
     }
+
+    Platform plat = { 0 };
+    PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH * videoScale, VIDEO_HEIGHT * videoScale, VIDEO_WIDTH, VIDEO_HEIGHT);
+
+    CPU chip8 = { 0 };
+    Chip8_Create(&chip8);
 
     size_t memsize = MEMORY_SIZE - START_ADDRESS;
 
