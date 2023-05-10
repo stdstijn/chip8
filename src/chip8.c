@@ -135,7 +135,7 @@ void Chip8_Cycle(CPU* cpu, uint32_t time)
     {
         // Handle unknown opcode
     }
-    
+
     static uint32_t lastTimerUpdate = 0;
 
     if (time - lastTimerUpdate >= 1000.0 / CLOCK_HZ + 0.5)
@@ -353,53 +353,29 @@ void OP_Dxyn(CPU* cpu) // DRW Vx, Vy, nibble
     uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
     uint8_t nibble = cpu->opcode & 0x000Fu;
 
-    // // Wrap if going beyond screen boundaries
-    // uint8_t xPos = cpu->v[x] % VIDEO_WIDTH;
-    // uint8_t yPos = cpu->v[y] % VIDEO_HEIGHT;
-
-    // cpu->v[0xF] = 0;
-
-    // for (size_t row = 0; row < nibble; row++)
-    // {
-    //     uint8_t spriteByte = cpu->memory[cpu->i + row];
-
-    //     for (size_t col = 0; col < 8; col++)
-    //     {
-    //         uint8_t spritePixel = spriteByte & (0x80u >> col);
-    //         uint16_t screenIndex = (yPos + row) * VIDEO_WIDTH + (xPos + col);
-    //         uint32_t* screenPixel = &cpu->gfx[screenIndex];
-
-    //         if (spritePixel)
-    //         {
-    //             if (*screenPixel == 0xFFFFFFFFu) 
-    //             {
-    //                 cpu->v[0xF] = 1;
-    //             }
-
-    //             *screenPixel ^= 0xFFFFFFFFu;
-    //         }
-    //     }
-    // }
-
     int mW, mH, W, col, row;
     W = 64; mW = 0x3F; mH = 0x1F;
 
     x = cpu->v[x]; y = cpu->v[y];
-    for (row = 0; row < nibble; row++) 
+    for (row = 0; row < nibble; row++)
     {
-        for (col = 0; col < 8; col++) 
+        for (col = 0; col < 8; col++)
         {
             int pix = (cpu->memory[cpu->i + row] & (0x80 >> col)) != 0;
 
-            if (pix) 
+            if (pix)
             {
                 int tx = (x + col) & mW, ty = (y + row) & mH;
                 int byte = ty * W + tx;
-                // byte >>= 3;
-                if (cpu->gfx[byte] == 0xFFFFFFFF)
-                    cpu->gfx[0xF] = 1;
-                    
-                cpu->gfx[byte] ^= 0xFFFFFFFF;
+                int bit = 1 << (byte & 0x07);
+                byte >>= 3;
+
+                if (cpu->gfx[byte] & bit)
+                {
+                    cpu->v[0x0F] = 1;
+                }
+
+                cpu->gfx[byte] ^= bit;
             }
         }
     }

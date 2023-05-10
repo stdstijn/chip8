@@ -34,7 +34,7 @@ struct CPU
     uint8_t delaytimer;
     uint8_t soundtimer;
     uint8_t key[KEY_COUNT];
-    uint32_t gfx[VIDEO_WIDTH * VIDEO_HEIGHT / sizeof(uint8_t)];
+    uint8_t gfx[VIDEO_WIDTH * VIDEO_HEIGHT / 8];
 
     OpcodeFunc table0X[0xE + 1];
     OpcodeFunc table1X[0x0 + 1];
