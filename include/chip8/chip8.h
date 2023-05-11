@@ -4,6 +4,10 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 typedef struct CPU CPU;
 typedef void (*OpcodeFunc)(CPU*);
 
@@ -25,12 +29,12 @@ enum VirtualMachineDescription
 struct CPU
 {
     uint8_t memory[MEMORY_SIZE];
-    uint8_t v[REGISTER_COUNT];
-    uint16_t i;
     uint16_t pc;
+    uint16_t opcode;
     uint16_t stack[STACK_LEVELS];
     uint16_t sp;
-    uint16_t opcode;
+    uint16_t i;
+    uint8_t v[REGISTER_COUNT];
     uint8_t delaytimer;
     uint8_t soundtimer;
     uint8_t key[KEY_COUNT];
@@ -96,5 +100,9 @@ void OP_Fx29(CPU* cpu); // LD F, Vx
 void OP_Fx33(CPU* cpu); // LD B, Vx
 void OP_Fx55(CPU* cpu); // LD [I], Vx
 void OP_Fx65(CPU* cpu); // LD Vx, [I]
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif // CHIP8_H

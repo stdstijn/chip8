@@ -22,9 +22,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    int scale = 10;
     const char* romFilename = argv[1];
-
     SDL_RWops* fp = SDL_RWFromFile(romFilename, "rb");
 
     if (!fp)
@@ -34,13 +32,12 @@ int main(int argc, char* argv[])
     }
 
     Platform plat = { 0 };
-    PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH, VIDEO_HEIGHT, scale);
+    PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH, VIDEO_HEIGHT, 10);
 
     CPU chip8 = { 0 };
     Chip8_Create(&chip8);
 
     size_t memsize = MEMORY_SIZE - START_ADDRESS;
-
     SDL_RWread(fp, chip8.memory + START_ADDRESS, 1, memsize);
     SDL_RWclose(fp);
 
