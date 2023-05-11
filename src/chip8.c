@@ -396,9 +396,9 @@ void OP_Ex9E(CPU* cpu) // SKP Vx
 void OP_ExA1(CPU* cpu) // SKNP Vx
 {
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
-    uint8_t key = cpu->v[x];
+    uint8_t vx = cpu->v[x];
 
-    if (!cpu->key[key]) cpu->pc += 2;
+    if (!cpu->key[vx]) cpu->pc += 2;
 }
 
 void OP_Fx07(CPU* cpu) // LD Vx, DT
