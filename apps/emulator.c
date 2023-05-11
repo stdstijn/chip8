@@ -72,34 +72,32 @@ void PlatformCreate(Platform* p, const char* title, int w, int h, int scale)
 {
     SDL_Init(SDL_INIT_VIDEO);
 
-    p->window = SDL_CreateWindow(title, 
-        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
-        w * scale, 
-        h * scale, 
-        0);
+    p->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, 
+        SDL_WINDOWPOS_CENTERED, w * scale, h * scale, 0);
 
-    p->renderer = SDL_CreateRenderer(p->window, 
-        -1, 
+    p->renderer = SDL_CreateRenderer(p->window, -1, 
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-    p->texture = SDL_CreateTexture(p->renderer, 
-        SDL_PIXELFORMAT_RGBA8888, 
-        SDL_TEXTUREACCESS_STREAMING, 
-        w, 
-        h);
+    p->texture = SDL_CreateTexture(p->renderer, SDL_PIXELFORMAT_RGBA8888, 
+        SDL_TEXTUREACCESS_STREAMING, w, h);
 }
 
 void PlatformDestroy(Platform* p)
 {
     SDL_DestroyTexture(p->texture);
+    p->texture = NULL;
+
     SDL_DestroyRenderer(p->renderer);
+    p->renderer = NULL;
+
     SDL_DestroyWindow(p->window);
+    p->window = NULL;
+
     SDL_Quit();
 }
 
 void PlatformUpdate(Platform* p, const void* buffer)
 {
-    SDL_SetRenderDrawColor(p->renderer, 0x00u, 0x00u, 0x00u, 0xFFu);
     SDL_RenderClear(p->renderer);
 
     static void* texture;
@@ -112,17 +110,16 @@ void PlatformUpdate(Platform* p, const void* buffer)
 
     for (size_t y = 0; y < VIDEO_HEIGHT; y++) 
     {
-        for (size_t x = 0; x < VIDEO_WIDTH; x++) {
-
-            int index = y * 64 + x;
+        for (size_t x = 0; x < VIDEO_WIDTH; x++) 
+        {
+            int index = y * VIDEO_WIDTH + x;
             int bitIndex = index % 8;
             int byteIndex = index / 8;
 
-            uint8_t bit = (src[byteIndex] >> bitIndex) & 0x01;
+            uint8_t bit = (src[byteIndex] >> bitIndex) & 0x01u;
             uint8_t pixel = bit * 0xFFu;
 
-            SDL_PixelFormat* format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
-            uint32_t color = SDL_MapRGBA(format, pixel, pixel, pixel, 0xFFu);
+            uint32_t color = (pixel) ? 0xFFFFFFFF : 0x00000000;
 
             pixels[y * pitch / 4 + x] = color;
         }
