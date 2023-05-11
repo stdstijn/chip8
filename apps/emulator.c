@@ -139,34 +139,36 @@ int PlatformProcessInput(uint8_t* keys)
     int quit = 0;
     SDL_Event event;
 
-    static const uint8_t map[] = {
-        0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7,
-        0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF
-    };
-
     while (SDL_PollEvent(&event))
     {
-        switch (event.type)
+        if (event.type == SDL_QUIT)
         {
-        case SDL_QUIT:
             quit = 1;
-            break;
-        case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_ESCAPE)
+        }
+        else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
+        {
+            int isKeyDown = (event.type == SDL_KEYDOWN);
+            
+            switch (event.key.keysym.sym)
             {
-                quit = 1;
+                case SDLK_ESCAPE: quit = 1; break;
+                case SDLK_x: keys[0x0] = isKeyDown; break;
+                case SDLK_1: keys[0x1] = isKeyDown; break;
+                case SDLK_2: keys[0x2] = isKeyDown; break;
+                case SDLK_3: keys[0x3] = isKeyDown; break;
+                case SDLK_q: keys[0x4] = isKeyDown; break;
+                case SDLK_w: keys[0x5] = isKeyDown; break;
+                case SDLK_e: keys[0x6] = isKeyDown; break;
+                case SDLK_a: keys[0x7] = isKeyDown; break;
+                case SDLK_s: keys[0x8] = isKeyDown; break;
+                case SDLK_d: keys[0x9] = isKeyDown; break;
+                case SDLK_z: keys[0xA] = isKeyDown; break;
+                case SDLK_c: keys[0xB] = isKeyDown; break;
+                case SDLK_4: keys[0xC] = isKeyDown; break;
+                case SDLK_r: keys[0xD] = isKeyDown; break;
+                case SDLK_f: keys[0xE] = isKeyDown; break;
+                case SDLK_v: keys[0xF] = isKeyDown; break;
             }
-            else if (event.key.keysym.sym < 128)
-            {
-                keys[map[event.key.keysym.sym]] = 1;
-            }
-            break;
-        case SDL_KEYUP:
-            if (event.key.keysym.sym < 128) 
-            {
-                keys[map[event.key.keysym.sym]] = 0;
-            }
-            break;
         }
     }
 
