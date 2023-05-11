@@ -136,10 +136,10 @@ void PlatformUpdate(Platform* p, const void* buffer)
 
 int PlatformProcessInput(uint8_t* keys)
 {
-        int quit = 0;
+    int quit = 0;
     SDL_Event event;
 
-    static const uint8_t keyMap[] = {
+    static const uint8_t map[] = {
         0x0, 0x1, 0x2, 0x3, 0x4, 0x5, 0x6, 0x7,
         0x8, 0x9, 0xA, 0xB, 0xC, 0xD, 0xE, 0xF
     };
@@ -152,14 +152,20 @@ int PlatformProcessInput(uint8_t* keys)
             quit = 1;
             break;
         case SDL_KEYDOWN:
-            if (event.key.keysym.sym == SDLK_ESCAPE) 
+            if (event.key.keysym.sym == SDLK_ESCAPE)
+            {
                 quit = 1;
-            if (event.key.keysym.sym < 128) 
-                keys[keyMap[event.key.keysym.sym]] = 1;
+            }
+            else if (event.key.keysym.sym < 128)
+            {
+                keys[map[event.key.keysym.sym]] = 1;
+            }
             break;
         case SDL_KEYUP:
             if (event.key.keysym.sym < 128) 
-                keys[keyMap[event.key.keysym.sym]] = 0;
+            {
+                keys[map[event.key.keysym.sym]] = 0;
+            }
             break;
         }
     }
