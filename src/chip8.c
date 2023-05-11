@@ -36,22 +36,22 @@ static const uint8_t fontset[FONT_SIZE] = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-static void clearMemory(void* ptr, size_t num)
+static void clearMemory(void* ptr, size_t len)
 {
     uint8_t* cptr = ptr;
 
-    for (size_t i = 0; i < num; i++)
+    for (size_t i = 0; i < len; i++)
     {
         cptr[i] = 0;
     }
 }
 
-static void copyMemory(void* dest, const void* src, size_t num)
+static void copyMemory(void* dest, const void* src, size_t len)
 {
     const uint8_t* csrc = src;
     uint8_t* cdest = dest;
 
-    for (size_t i = 0; i < num; i++)
+    for (size_t i = 0; i < len; i++)
     {
         cdest[i] = csrc[i];
     }
@@ -118,7 +118,7 @@ void Chip8_Create(CPU* cpu)
 
 }
 
-void Chip8_Cycle(CPU* cpu, uint32_t time)
+void Chip8_Cycle(CPU* cpu, const uint32_t time)
 {
     cpu->opcode = (cpu->memory[cpu->pc] << 8u) | cpu->memory[cpu->pc + 1];
 
@@ -353,26 +353,30 @@ void OP_Dxyn(CPU* cpu) // DRW Vx, Vy, nibble
     uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
     uint8_t nibble = cpu->opcode & 0x000Fu;
 
-    int mW, mH, W, col, row;
-    W = 64; mW = 0x3F; mH = 0x1F;
+    uint8_t vx = cpu->v[x];
+    uint8_t vy = cpu->v[y];
 
-    x = cpu->v[x]; y = cpu->v[y];
-    for (row = 0; row < nibble; row++)
+    cpu->v[0xF] = 0;
+
+    for (size_t row = 0; row < nibble; row++)
     {
-        for (col = 0; col < 8; col++)
+        for (size_t col = 0; col < 8; col++)
         {
-            int pix = (cpu->memory[cpu->i + row] & (0x80 >> col)) != 0;
+            uint8_t pixel = (cpu->memory[cpu->i + row] & (0x80u >> col)) != 0;
 
-            if (pix)
+            if (pixel)
             {
-                int tx = (x + col) & mW, ty = (y + row) & mH;
-                int byte = ty * W + tx;
-                int bit = 1 << (byte & 0x07);
+                uint16_t tx = (vx + col) & (VIDEO_WIDTH - 1);
+                uint16_t ty = (vy + row) & (VIDEO_HEIGHT - 1);
+                uint16_t byte = ty * VIDEO_WIDTH + tx;
+
+                uint8_t bit = 1 << (byte & 0x07u);
+
                 byte >>= 3;
 
                 if (cpu->gfx[byte] & bit)
                 {
-                    cpu->v[0x0F] = 1;
+                    cpu->v[0xF] = 1;
                 }
 
                 cpu->gfx[byte] ^= bit;

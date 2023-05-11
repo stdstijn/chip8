@@ -1,6 +1,6 @@
 #include "chip8/chip8.h"
 
-#include "SDL.h"
+#include <SDL2/SDL.h>
 
 typedef struct Platform
 {
@@ -9,9 +9,9 @@ typedef struct Platform
     SDL_Texture* texture;
 } Platform;
 
-void PlatformCreate(Platform* p, const char* title, int windowWidth, int windowHeight, int textureWidth, int textureHeight);
+void PlatformCreate(Platform* p, const char* title, int windowW, int windowH, int textureW, int textureH);
 void PlatformDestroy(Platform* p);
-void PlatformUpdate(Platform* p, const void* buffer, int pitch);
+void PlatformUpdate(Platform* p, const void* buffer);
 int PlatformProcessInput(uint8_t* keys);
 
 int main(int argc, char* argv[])
@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    int videoScale = 10;
+    int scale = 10;
     const char* romFilename = argv[1];
 
     SDL_RWops* fp = SDL_RWFromFile(romFilename, "rb");
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
     }
 
     Platform plat = { 0 };
-    PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH * videoScale, VIDEO_HEIGHT * videoScale, VIDEO_WIDTH, VIDEO_HEIGHT);
+    PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH * scale, VIDEO_HEIGHT * scale, VIDEO_WIDTH, VIDEO_HEIGHT);
 
     CPU chip8 = { 0 };
     Chip8_Create(&chip8);
@@ -44,23 +44,20 @@ int main(int argc, char* argv[])
     SDL_RWread(fp, chip8.memory + START_ADDRESS, 1, memsize);
     SDL_RWclose(fp);
 
-    int videoPitch = sizeof(chip8.gfx[0]) * VIDEO_WIDTH;
-
     int quit = 0;
+    int time = 0;
+    int lastPlatformUpdate = 0;
 
     while (!quit)
     {
         quit = PlatformProcessInput(chip8.key);
-
-        uint32_t time = SDL_GetTicks();
+        time = SDL_GetTicks();
 
         Chip8_Cycle(&chip8, time);
 
-        static uint32_t lastPlatformUpdate = 0;
-
         if (time - lastPlatformUpdate >= 1000.0 / CLOCK_HZ + 0.5)
         {
-            PlatformUpdate(&plat, chip8.gfx, videoPitch);
+            PlatformUpdate(&plat, chip8.gfx);
 
             lastPlatformUpdate = time;
         }
@@ -71,13 +68,13 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void PlatformCreate(Platform* p, const char* title, int windowWidth, int windowHeight, int textureWidth, int textureHeight)
+void PlatformCreate(Platform* p, const char* title, int windowW, int windowH, int textureW, int textureH)
 {
     SDL_Init(SDL_INIT_VIDEO);
 
-    p->window = SDL_CreateWindow(title, 0, 0, windowWidth, windowHeight, SDL_WINDOW_SHOWN);
-    p->renderer = SDL_CreateRenderer(p->window, -1, 0);
-    p->texture = SDL_CreateTexture(p->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, textureWidth, textureHeight);
+    p->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowW, windowH, 0);
+    p->renderer = SDL_CreateRenderer(p->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    p->texture = SDL_CreateTexture(p->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, textureW, textureH);
 }
 
 void PlatformDestroy(Platform* p)
@@ -88,10 +85,39 @@ void PlatformDestroy(Platform* p)
     SDL_Quit();
 }
 
-void PlatformUpdate(Platform* p, const void* buffer, int pitch)
+void PlatformUpdate(Platform* p, const void* buffer)
 {
-    SDL_UpdateTexture(p->texture, NULL, buffer, pitch);
+    SDL_SetRenderDrawColor(p->renderer, 0x00u, 0x00u, 0x00u, 0xFFu);
     SDL_RenderClear(p->renderer);
+
+    static void* texture;
+    static int pitch;
+
+    SDL_LockTexture(p->texture, NULL, &texture, &pitch);
+
+    const uint8_t* src = buffer;
+    uint32_t* pixels = texture;
+
+    for (size_t y = 0; y < VIDEO_HEIGHT; y++) 
+    {
+        for (size_t x = 0; x < VIDEO_WIDTH; x++) {
+
+            int index = y * 64 + x;
+            int bitIndex = index % 8;
+            int byteIndex = index / 8;
+
+            uint8_t bit = (src[byteIndex] >> bitIndex) & 0x01;
+            uint8_t pixel = bit * 0xFFu;
+
+            SDL_PixelFormat* format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
+            uint32_t color = SDL_MapRGBA(format, pixel, pixel, pixel, 0xFFu);
+
+            pixels[y * pitch / 4 + x] = color;
+        }
+    }
+
+    SDL_UnlockTexture(p->texture);
+
     SDL_RenderCopy(p->renderer, p->texture, NULL, NULL);
     SDL_RenderPresent(p->renderer);
 }

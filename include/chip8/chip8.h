@@ -59,7 +59,7 @@ struct CPU
 void Chip8_Create(CPU* cpu);
 void Chip8_Destroy(CPU* cpu);
 
-void Chip8_Cycle(CPU* cpu, uint32_t time);
+void Chip8_Cycle(CPU* cpu, const uint32_t time);
 
 void OP_00E0(CPU* cpu); // CLS
 void OP_00EE(CPU* cpu); // RET
