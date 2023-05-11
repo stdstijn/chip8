@@ -9,7 +9,7 @@ typedef struct Platform
     SDL_Texture* texture;
 } Platform;
 
-void PlatformCreate(Platform* p, const char* title, int windowW, int windowH, int textureW, int textureH);
+void PlatformCreate(Platform* p, const char* title, int w, int h, int scale);
 void PlatformDestroy(Platform* p);
 void PlatformUpdate(Platform* p, const void* buffer);
 int PlatformProcessInput(uint8_t* keys);
@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
     }
 
     Platform plat = { 0 };
-    PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH * scale, VIDEO_HEIGHT * scale, VIDEO_WIDTH, VIDEO_HEIGHT);
+    PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH, VIDEO_HEIGHT, scale);
 
     CPU chip8 = { 0 };
     Chip8_Create(&chip8);
@@ -68,13 +68,25 @@ int main(int argc, char* argv[])
     return 0;
 }
 
-void PlatformCreate(Platform* p, const char* title, int windowW, int windowH, int textureW, int textureH)
+void PlatformCreate(Platform* p, const char* title, int w, int h, int scale)
 {
     SDL_Init(SDL_INIT_VIDEO);
 
-    p->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, windowW, windowH, 0);
-    p->renderer = SDL_CreateRenderer(p->window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    p->texture = SDL_CreateTexture(p->renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_STREAMING, textureW, textureH);
+    p->window = SDL_CreateWindow(title, 
+        SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 
+        w * scale, 
+        h * scale, 
+        0);
+
+    p->renderer = SDL_CreateRenderer(p->window, 
+        -1, 
+        SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
+    p->texture = SDL_CreateTexture(p->renderer, 
+        SDL_PIXELFORMAT_RGBA8888, 
+        SDL_TEXTUREACCESS_STREAMING, 
+        w, 
+        h);
 }
 
 void PlatformDestroy(Platform* p)

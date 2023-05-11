@@ -1,21 +1,21 @@
 #include "chip8/chip8.h"
 
-static void dispatcher0X(CPU*);
-static void dispatcher1X(CPU*);
-static void dispatcher2X(CPU*);
-static void dispatcher3X(CPU*);
-static void dispatcher4X(CPU*);
-static void dispatcher5X(CPU*);
-static void dispatcher6X(CPU*);
-static void dispatcher7X(CPU*);
-static void dispatcher8X(CPU*);
-static void dispatcher9X(CPU*);
-static void dispatcherAX(CPU*);
-static void dispatcherBX(CPU*);
-static void dispatcherCX(CPU*);
-static void dispatcherDX(CPU*);
-static void dispatcherEX(CPU*);
-static void dispatcherFX(CPU*);
+static void dispatcher0X(CPU* cpu);
+static void dispatcher1X(CPU* cpu);
+static void dispatcher2X(CPU* cpu);
+static void dispatcher3X(CPU* cpu);
+static void dispatcher4X(CPU* cpu);
+static void dispatcher5X(CPU* cpu);
+static void dispatcher6X(CPU* cpu);
+static void dispatcher7X(CPU* cpu);
+static void dispatcher8X(CPU* cpu);
+static void dispatcher9X(CPU* cpu);
+static void dispatcherAX(CPU* cpu);
+static void dispatcherBX(CPU* cpu);
+static void dispatcherCX(CPU* cpu);
+static void dispatcherDX(CPU* cpu);
+static void dispatcherEX(CPU* cpu);
+static void dispatcherFX(CPU* cpu);
 
 static const uint8_t fontset[FONT_SIZE] = {
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
