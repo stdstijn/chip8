@@ -12,7 +12,7 @@ typedef struct Platform
 void PlatformCreate(Platform* p, const char* title, int w, int h, int scale);
 void PlatformDestroy(Platform* p);
 void PlatformUpdate(Platform* p, const void* buffer);
-int PlatformProcessInput(uint8_t* keys);
+int PlatformProcessInput(uint16_t* keys);
 
 int main(int argc, char* argv[])
 {
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 
     while (!quit)
     {
-        quit = PlatformProcessInput(chip8.key);
+        quit = PlatformProcessInput(&chip8.key);
         time = SDL_GetTicks();
 
         Chip8_Cycle(&chip8, time);
@@ -69,13 +69,13 @@ void PlatformCreate(Platform* p, const char* title, int w, int h, int scale)
 {
     SDL_Init(SDL_INIT_VIDEO);
 
-    p->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED, 
+    p->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED, w * scale, h * scale, 0);
 
-    p->renderer = SDL_CreateRenderer(p->window, -1, 
+    p->renderer = SDL_CreateRenderer(p->window, -1,
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-    p->texture = SDL_CreateTexture(p->renderer, SDL_PIXELFORMAT_RGBA8888, 
+    p->texture = SDL_CreateTexture(p->renderer, SDL_PIXELFORMAT_RGBA8888,
         SDL_TEXTUREACCESS_STREAMING, w, h);
 }
 
@@ -105,9 +105,9 @@ void PlatformUpdate(Platform* p, const void* buffer)
     const uint8_t* src = buffer;
     uint32_t* pixels = texture;
 
-    for (size_t y = 0; y < VIDEO_HEIGHT; y++) 
+    for (size_t y = 0; y < VIDEO_HEIGHT; y++)
     {
-        for (size_t x = 0; x < VIDEO_WIDTH; x++) 
+        for (size_t x = 0; x < VIDEO_WIDTH; x++)
         {
             int index = y * VIDEO_WIDTH + x;
             int bitIndex = index % 8;
@@ -128,41 +128,75 @@ void PlatformUpdate(Platform* p, const void* buffer)
     SDL_RenderPresent(p->renderer);
 }
 
-int PlatformProcessInput(uint8_t* keys)
+int PlatformProcessInput(uint16_t* keys)
 {
     int quit = 0;
     SDL_Event event;
 
     while (SDL_PollEvent(&event))
     {
-        if (event.type == SDL_QUIT)
+        if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
         {
-            quit = 1;
-        }
-        else if (event.type == SDL_KEYDOWN || event.type == SDL_KEYUP)
-        {
-            int isKeyDown = (event.type == SDL_KEYDOWN);
-            
+            int pressed = (event.type == SDL_KEYDOWN);
+
             switch (event.key.keysym.sym)
             {
-                case SDLK_ESCAPE: quit = 1; break;
-                case SDLK_x: keys[0x0] = isKeyDown; break;
-                case SDLK_1: keys[0x1] = isKeyDown; break;
-                case SDLK_2: keys[0x2] = isKeyDown; break;
-                case SDLK_3: keys[0x3] = isKeyDown; break;
-                case SDLK_q: keys[0x4] = isKeyDown; break;
-                case SDLK_w: keys[0x5] = isKeyDown; break;
-                case SDLK_e: keys[0x6] = isKeyDown; break;
-                case SDLK_a: keys[0x7] = isKeyDown; break;
-                case SDLK_s: keys[0x8] = isKeyDown; break;
-                case SDLK_d: keys[0x9] = isKeyDown; break;
-                case SDLK_z: keys[0xA] = isKeyDown; break;
-                case SDLK_c: keys[0xB] = isKeyDown; break;
-                case SDLK_4: keys[0xC] = isKeyDown; break;
-                case SDLK_r: keys[0xD] = isKeyDown; break;
-                case SDLK_f: keys[0xE] = isKeyDown; break;
-                case SDLK_v: keys[0xF] = isKeyDown; break;
+            case SDLK_ESCAPE: 
+                quit = 1; 
+                break;
+            case SDLK_x:
+                *keys = (*keys & ~(0x00000001u << 0x0u)) | (pressed << 0x0u);
+                break;
+            case SDLK_1:
+                *keys = (*keys & ~(0x00000001u << 0x1u)) | (pressed << 0x1u);
+                break;
+            case SDLK_2:
+                *keys = (*keys & ~(0x00000001u << 0x2u)) | (pressed << 0x2u);
+                break;
+            case SDLK_3:
+                *keys = (*keys & ~(0x00000001u << 0x3u)) | (pressed << 0x3u);
+                break;
+            case SDLK_q:
+                *keys = (*keys & ~(0x00000001u << 0x4u)) | (pressed << 0x4u);
+                break;
+            case SDLK_w:
+                *keys = (*keys & ~(0x00000001u << 0x5u)) | (pressed << 0x5u);
+                break;
+            case SDLK_e:
+                *keys = (*keys & ~(0x00000001u << 0x6u)) | (pressed << 0x6u);
+                break;
+            case SDLK_a:
+                *keys = (*keys & ~(0x00000001u << 0x7u)) | (pressed << 0x7u);
+                break;
+            case SDLK_s:
+                *keys = (*keys & ~(0x00000001u << 0x8u)) | (pressed << 0x8u);
+                break;
+            case SDLK_d:
+                *keys = (*keys & ~(0x00000001u << 0x9u)) | (pressed << 0x9u);
+                break;
+            case SDLK_z:
+                *keys = (*keys & ~(0x00000001u << 0xAu)) | (pressed << 0xAu);
+                break;
+            case SDLK_c:
+                *keys = (*keys & ~(0x00000001u << 0xBu)) | (pressed << 0xBu);
+                break;
+            case SDLK_4:
+                *keys = (*keys & ~(0x00000001u << 0xCu)) | (pressed << 0xCu);
+                break;
+            case SDLK_r:
+                *keys = (*keys & ~(0x00000001u << 0xDu)) | (pressed << 0xDu);
+                break;
+            case SDLK_f:
+                *keys = (*keys & ~(0x00000001u << 0xEu)) | (pressed << 0xEu);
+                break;
+            case SDLK_v:
+                *keys = (*keys & ~(0x00000001u << 0xFu)) | (pressed << 0xFu);
+                break;
             }
+        }
+        else if (event.type == SDL_QUIT)
+        {
+            quit = 1;
         }
     }
 

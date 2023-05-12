@@ -388,17 +388,15 @@ void OP_Dxyn(CPU* cpu) // DRW Vx, Vy, nibble
 void OP_Ex9E(CPU* cpu) // SKP Vx
 {
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
-    uint8_t vx = cpu->v[x];
 
-    if (cpu->key[vx]) cpu->pc += 2;
+    if (cpu->key & (0x00000001u << cpu->v[x])) cpu->pc += 2;
 }
 
 void OP_ExA1(CPU* cpu) // SKNP Vx
 {
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
-    uint8_t vx = cpu->v[x];
 
-    if (!cpu->key[vx]) cpu->pc += 2;
+    if (!(cpu->key & (0x00000001u << cpu->v[x]))) cpu->pc += 2;
 }
 
 void OP_Fx07(CPU* cpu) // LD Vx, DT
@@ -412,27 +410,25 @@ void OP_Fx0A(CPU* cpu) // LD Vx, K
 {
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
 
-    static uint8_t keyPressed[0xF];
+    if (!cpu->key) 
+    {
+        cpu->pc -= 2;
 
-    if (cpu->key[0x0] && keyPressed[0x0]) cpu->v[x] = 0;
-    else if (!cpu->key[0x1] && keyPressed[0x1]) cpu->v[x] = 0x1;
-    else if (!cpu->key[0x2] && keyPressed[0x2]) cpu->v[x] = 0x2;
-    else if (!cpu->key[0x3] && keyPressed[0x3]) cpu->v[x] = 0x3;
-    else if (!cpu->key[0x4] && keyPressed[0x4]) cpu->v[x] = 0x4;
-    else if (!cpu->key[0x5] && keyPressed[0x5]) cpu->v[x] = 0x5;
-    else if (!cpu->key[0x6] && keyPressed[0x6]) cpu->v[x] = 0x6;
-    else if (!cpu->key[0x7] && keyPressed[0x7]) cpu->v[x] = 0x7;
-    else if (!cpu->key[0x8] && keyPressed[0x8]) cpu->v[x] = 0x8;
-    else if (!cpu->key[0x9] && keyPressed[0x9]) cpu->v[x] = 0x9;
-    else if (!cpu->key[0xA] && keyPressed[0xA]) cpu->v[x] = 0xA;
-    else if (!cpu->key[0xB] && keyPressed[0xB]) cpu->v[x] = 0xB;
-    else if (!cpu->key[0xC] && keyPressed[0xC]) cpu->v[x] = 0xC;
-    else if (!cpu->key[0xD] && keyPressed[0xD]) cpu->v[x] = 0xD;
-    else if (!cpu->key[0xE] && keyPressed[0xE]) cpu->v[x] = 0xE;
-    else if (!cpu->key[0xF] && keyPressed[0xF]) cpu->v[x] = 0xF;
-    else cpu->pc -= 2;
+        return;
+    }
 
-    copyMemory(keyPressed, cpu->key, sizeof(cpu->key));
+    for (size_t i = 0; i < KEY_COUNT - 1; i++) 
+    {
+        if (cpu->key & (0x00000001u << i)) 
+        {
+            cpu->v[x] = i;
+
+            break;
+        }
+    }
+
+    cpu->key = 0;
+
 }
 
 void OP_Fx15(CPU* cpu) // LD DT, Vx
