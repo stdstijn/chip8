@@ -110,13 +110,13 @@ void PlatformUpdate(Platform* p, const void* buffer)
         for (size_t x = 0; x < VIDEO_WIDTH; x++)
         {
             int index = y * VIDEO_WIDTH + x;
-            int bitIndex = index % 8;
-            int byteIndex = index / 8;
+            int bitIndex = index & 7u;
+            int byteIndex = index >> 3u;
 
             uint8_t bit = (src[byteIndex] >> bitIndex) & 0x01u;
             uint8_t pixel = bit * 0xFFu;
 
-            uint32_t color = (pixel) ? 0xFFFFFFFF : 0x00000000;
+            uint32_t color = (pixel) ? 0xFFFFFFFFu : 0x00000000u;
 
             pixels[y * pitch / 4 + x] = color;
         }
