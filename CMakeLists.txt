@@ -20,14 +20,12 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
   add_compile_options(-Wall -Wextra -Werror -pedantic -O1)
 
-  set (CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
-  add_subdirectory(apps)
-
   include(CTest)
-
+  
   option(VENDORED_SDL "Use vendored SDL library" OFF)
   if(VENDORED_SDL)
     add_subdirectory(extern/sdl EXCLUDE_FROM_ALL)
@@ -35,12 +33,13 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     find_package(SDL2 REQUIRED CONFIG REQUIRED COMPONENTS SDL2)
     find_package(SDL2 REQUIRED CONFIG COMPONENTS SDL2main)
   endif()
+
+  add_subdirectory(apps)
 endif()
 
 include(FetchContent)
 
 add_subdirectory(src)
-
 
 if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR CHIP8_BUILD_TESTING)
    AND BUILD_TESTING)
