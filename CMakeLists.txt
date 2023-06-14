@@ -24,6 +24,8 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
 
   set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
+  add_subdirectory(apps)
+
   include(CTest)
 
   option(VENDORED_SDL "Use vendored SDL library" OFF)
@@ -39,7 +41,6 @@ include(FetchContent)
 
 add_subdirectory(src)
 
-add_subdirectory(apps)
 
 if((CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME OR CHIP8_BUILD_TESTING)
    AND BUILD_TESTING)

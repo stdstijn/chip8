@@ -225,6 +225,7 @@ void OP_8xy1(CPU* cpu) // OR Vx, Vy
     uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
 
     cpu->v[x] |= cpu->v[y];
+    cpu->v[0xF] = 0;
 }
 
 void OP_8xy2(CPU* cpu) // AND Vx, Vy
@@ -233,6 +234,7 @@ void OP_8xy2(CPU* cpu) // AND Vx, Vy
     uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
 
     cpu->v[x] &= cpu->v[y];
+    cpu->v[0xF] = 0;
 }
 
 void OP_8xy3(CPU* cpu) // XOR Vx, Vy
@@ -241,6 +243,7 @@ void OP_8xy3(CPU* cpu) // XOR Vx, Vy
     uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
 
     cpu->v[x] ^= cpu->v[y];
+    cpu->v[0xF] = 0;
 }
 
 void OP_8xy4(CPU* cpu) // ADD Vx, Vy
@@ -266,9 +269,13 @@ void OP_8xy5(CPU* cpu) // SUB Vx, Vy
 void OP_8xy6(CPU* cpu) // SHR Vx {, Vy}
 {
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+
+    cpu->v[x] = cpu->v[y];
+
     uint8_t vx = cpu->v[x];
 
-    cpu->v[x] >>= 1;
+    cpu->v[x] >>= 1u;
     cpu->v[0xF] = (vx & 0x01u);
 }
 
@@ -284,9 +291,13 @@ void OP_8xy7(CPU* cpu) // SUBN Vx, Vy
 void OP_8xyE(CPU* cpu) // SHL Vx {, Vy}
 {
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
+    uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+
+    cpu->v[x] = cpu->v[y];
+
     uint8_t vx = cpu->v[x];
 
-    cpu->v[x] <<= 1;
+    cpu->v[x] <<= 1u;
     cpu->v[0xF] = (vx & 0x80u) >> 7u;
 }
 
@@ -334,8 +345,8 @@ void OP_Dxyn(CPU* cpu) // DRW Vx, Vy, nibble
     uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
     uint8_t nibble = cpu->opcode & 0x000Fu;
 
-    uint8_t vx = cpu->v[x];
-    uint8_t vy = cpu->v[y];
+    uint8_t vx = cpu->v[x] & (VIDEO_WIDTH - 1);;
+    uint8_t vy = cpu->v[y] & (VIDEO_HEIGHT - 1);;
 
     cpu->v[0xF] = 0;
 
@@ -343,14 +354,17 @@ void OP_Dxyn(CPU* cpu) // DRW Vx, Vy, nibble
     {
         for (size_t col = 0; col < 8; col++)
         {
-            uint8_t pixel = (cpu->memory[cpu->i + row] & (0x80u >> col)) != 0;
+            if (vx + col > VIDEO_WIDTH - 1 || vy + row > VIDEO_HEIGHT - 1)
+            {
+                break;
+            }
 
-            if (pixel)
+            if (cpu->memory[cpu->i + row] & (0x80u >> col))
             {
                 uint16_t tx = (vx + col) & (VIDEO_WIDTH - 1);
                 uint16_t ty = (vy + row) & (VIDEO_HEIGHT - 1);
-                uint16_t byte = ty * VIDEO_WIDTH + tx;
 
+                uint16_t byte = ty * VIDEO_WIDTH + tx;
                 uint8_t bit = 1u << (byte & 0x07u);
 
                 byte >>= 3u;
@@ -458,20 +472,26 @@ void OP_Fx55(CPU* cpu) // LD [I], Vx
 {
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
 
-    for (size_t i = 0; i <= x; i++)
+    size_t i;
+    for (i = 0; i <= x; i++)
     {
         cpu->memory[cpu->i + i] = cpu->v[i];
     }
+
+    cpu->i += i;
 }
 
 void OP_Fx65(CPU* cpu) // LD Vx, [I]
 {
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
 
-    for (size_t i = 0; i <= x; i++)
+    size_t i;
+    for (i = 0; i <= x; i++)
     {
         cpu->v[i] = cpu->memory[cpu->i + i];
     }
+
+    cpu->i += i;
 }
 
 static void dispatcher0X(CPU* cpu)
