@@ -96,7 +96,6 @@ void Chip8_Create(CPU* cpu)
     cpu->dispatcher[0xD] = dispatcherDX;
     cpu->dispatcher[0xE] = dispatcherEX;
     cpu->dispatcher[0xF] = dispatcherFX;
-
 }
 
 void Chip8_Cycle(CPU* cpu, const uint32_t time)
@@ -344,9 +343,8 @@ void OP_Dxyn(CPU* cpu) // DRW Vx, Vy, nibble
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
     uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
     uint8_t nibble = cpu->opcode & 0x000Fu;
-
-    uint8_t vx = cpu->v[x] & (VIDEO_WIDTH - 1);;
-    uint8_t vy = cpu->v[y] & (VIDEO_HEIGHT - 1);;
+    uint8_t vx = cpu->v[x] & (VIDEO_WIDTH - 1);
+    uint8_t vy = cpu->v[y] & (VIDEO_HEIGHT - 1);
 
     cpu->v[0xF] = 0;
 
