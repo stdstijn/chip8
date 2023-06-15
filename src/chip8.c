@@ -42,6 +42,7 @@ void Chip8_Create(CPU* cpu)
 {
     clearMemory(cpu, sizeof(CPU));
     cpu->pc = START_ADDRESS;
+    cpu->vbi = 1;
 
     copyMemory(cpu->memory + FONTSET_ADDRESS, fontset, FONT_SIZE);
 
@@ -100,8 +101,9 @@ void Chip8_Create(CPU* cpu)
 
 void Chip8_Cycle(CPU* cpu, const uint32_t time)
 {
-    cpu->opcode = (cpu->memory[cpu->pc] << 8u) | cpu->memory[cpu->pc + 1];
+    cpu->draw = 0;
 
+    cpu->opcode = (cpu->memory[cpu->pc] << 8u) | cpu->memory[cpu->pc + 1];
     cpu->pc += 2;
 
     uint8_t nibble = (cpu->opcode & 0xF000u) >> 12u;
@@ -130,6 +132,7 @@ void Chip8_Cycle(CPU* cpu, const uint32_t time)
         }
 
         lastTimerUpdate = time;
+        cpu->vbi = 1;
     }
 }
 
@@ -269,10 +272,9 @@ void OP_8xy6(CPU* cpu) // SHR Vx {, Vy}
 {
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
     uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+    uint8_t vx = cpu->v[x];
 
     cpu->v[x] = cpu->v[y];
-
-    uint8_t vx = cpu->v[x];
 
     cpu->v[x] >>= 1u;
     cpu->v[0xF] = (vx & 0x01u);
@@ -291,10 +293,9 @@ void OP_8xyE(CPU* cpu) // SHL Vx {, Vy}
 {
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
     uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
+    uint8_t vx = cpu->v[x];
 
     cpu->v[x] = cpu->v[y];
-
-    uint8_t vx = cpu->v[x];
 
     cpu->v[x] <<= 1u;
     cpu->v[0xF] = (vx & 0x80u) >> 7u;
@@ -340,6 +341,13 @@ void OP_Cxkk(CPU* cpu) // RND Vx, byte
 
 void OP_Dxyn(CPU* cpu) // DRW Vx, Vy, nibble
 {
+    if (cpu->vbi == 0)
+    {
+        cpu->pc -= 2;
+
+        return;
+    }
+
     uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
     uint8_t y = (cpu->opcode & 0x00F0u) >> 4u;
     uint8_t nibble = cpu->opcode & 0x000Fu;
@@ -376,6 +384,9 @@ void OP_Dxyn(CPU* cpu) // DRW Vx, Vy, nibble
             }
         }
     }
+
+    cpu->vbi = 0;
+    cpu->draw = 1;
 }
 
 void OP_Ex9E(CPU* cpu) // SKP Vx
@@ -401,14 +412,14 @@ void OP_Fx07(CPU* cpu) // LD Vx, DT
 
 void OP_Fx0A(CPU* cpu) // LD Vx, K
 {
-    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
-
     if (!cpu->key) 
     {
         cpu->pc -= 2;
 
         return;
     }
+
+    uint8_t x = (cpu->opcode & 0x0F00u) >> 8u;
 
     for (size_t i = 0; i < KEY_COUNT - 1; i++) 
     {

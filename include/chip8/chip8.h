@@ -40,6 +40,9 @@ struct CPU
     uint16_t key;
     uint8_t gfx[VIDEO_WIDTH * VIDEO_HEIGHT / 8];
 
+    uint8_t vbi;
+    uint8_t draw;
+
     OpcodeFunc table0X[0xE + 1];
     OpcodeFunc table1X[0x0 + 1];
     OpcodeFunc table2X[0x0 + 1];
