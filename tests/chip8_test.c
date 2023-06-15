@@ -2,7 +2,7 @@
 
 #include <unity.h>
 
-static CPU chip8;
+static Chip8_Cpu chip8;
 
 void setUp(void)
 {

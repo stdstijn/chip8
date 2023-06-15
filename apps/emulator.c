@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
     Platform plat = { 0 };
     PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH, VIDEO_HEIGHT, 10);
 
-    CPU chip8 = { 0 };
+    Chip8_Cpu chip8 = { 0 };
     Chip8_Create(&chip8);
 
     size_t memsize = MEMORY_SIZE - START_ADDRESS;
