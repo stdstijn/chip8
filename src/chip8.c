@@ -147,9 +147,10 @@ void Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time)
     }
 
     static uint32_t lastTimerUpdate = 0;
-
     if (time - lastTimerUpdate >= 1000.0 / CLOCK_HZ + 0.5)
     {
+        cpu->vbi = 1;
+
         if (cpu->delaytimer > 0)
         {
             cpu->delaytimer -= 1;
@@ -160,7 +161,6 @@ void Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time)
         }
 
         lastTimerUpdate = time;
-        cpu->vbi = 1;
     }
 }
 
@@ -332,7 +332,6 @@ void OP_Dxyn(Chip8_Cpu* cpu) // DRW Vx, Vy, nibble
     if (cpu->vbi == 0)
     {
         cpu->pc -= 2;
-
         return;
     }
 
@@ -397,7 +396,6 @@ void OP_Fx0A(Chip8_Cpu* cpu) // LD Vx, K
     if (!cpu->key) 
     {
         cpu->pc -= 2;
-
         return;
     }
 
@@ -406,7 +404,6 @@ void OP_Fx0A(Chip8_Cpu* cpu) // LD Vx, K
         if (cpu->key & (0x00000001u << i)) 
         {
             cpu->v[cpu->opcode.x] = i;
-
             break;
         }
     }
