@@ -1,24 +1,5 @@
 #include "chip8/chip8.h"
 
-static const uint8_t fontset[FONT_SIZE] = {
-    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-    0x20, 0x60, 0x20, 0x20, 0x70, // 1
-    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-    0xF0, 0x80, 0xF0, 0x80, 0x80  // F
-};
-
 static void dispatcher0X(Chip8_Cpu* cpu);
 static void dispatcher1X(Chip8_Cpu* cpu);
 static void dispatcher2X(Chip8_Cpu* cpu);
@@ -59,6 +40,25 @@ static void copyMemory(void* dest, const void* src, size_t len)
 
 void Chip8_Create(Chip8_Cpu* cpu)
 {
+    const uint8_t fontset[FONT_SIZE] = {
+        0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
+        0x20, 0x60, 0x20, 0x20, 0x70, // 1
+        0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
+        0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
+        0x90, 0x90, 0xF0, 0x10, 0x10, // 4
+        0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
+        0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
+        0xF0, 0x10, 0x20, 0x40, 0x40, // 7
+        0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
+        0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
+        0xF0, 0x90, 0xF0, 0x90, 0x90, // A
+        0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
+        0xF0, 0x80, 0x80, 0x80, 0xF0, // C
+        0xE0, 0x90, 0x90, 0x90, 0xE0, // D
+        0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
+        0xF0, 0x80, 0xF0, 0x80, 0x80  // F
+    };
+
     clearMemory(cpu, sizeof(Chip8_Cpu));
     cpu->pc = START_ADDRESS;
     cpu->vbi = 1;
@@ -131,26 +131,24 @@ void Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time)
         .nnn = opcode & 0x0FFFu,
     };
     
-    cpu->draw = 0;
     cpu->pc += 2;
+    cpu->draw = 0;
 
-    uint8_t nibble = (cpu->opcode.inst & 0xF000u) >> 12u;
-    OpcodeFunc func = cpu->dispatcher.table[nibble];
+    uint8_t instruction = (cpu->opcode.inst & 0xF000u) >> 12u;
+    OpcodeFunc operation = cpu->dispatcher.table[instruction];
 
-    if (func)
+    if (operation)
     {
-        func(cpu);
+        operation(cpu);
     }
     else
     {
         // Handle unknown opcode
     }
 
-    static uint32_t lastTimerUpdate = 0;
-    if (time - lastTimerUpdate >= 1000.0 / CLOCK_HZ + 0.5)
+    static uint32_t lastTick = 0;
+    if (time - lastTick >= 1000.0 / CLOCK_HZ + 0.5)
     {
-        cpu->vbi = 1;
-
         if (cpu->delaytimer > 0)
         {
             cpu->delaytimer -= 1;
@@ -160,7 +158,8 @@ void Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time)
             cpu->soundtimer -= 1;
         }
 
-        lastTimerUpdate = time;
+        lastTick = time;
+        cpu->vbi = 1;
     }
 }
 
@@ -239,19 +238,19 @@ void OP_8xy0(Chip8_Cpu* cpu) // LD Vx, Vy
 void OP_8xy1(Chip8_Cpu* cpu) // OR Vx, Vy
 {
     cpu->v[cpu->opcode.x] |= cpu->v[cpu->opcode.y];
-    cpu->v[0xF] = 0;
+    cpu->v[0xF] = 0x00u;
 }
 
 void OP_8xy2(Chip8_Cpu* cpu) // AND Vx, Vy
 {
     cpu->v[cpu->opcode.x] &= cpu->v[cpu->opcode.y];
-    cpu->v[0xF] = 0;
+    cpu->v[0xF] = 0x00u;
 }
 
 void OP_8xy3(Chip8_Cpu* cpu) // XOR Vx, Vy
 {
     cpu->v[cpu->opcode.x] ^= cpu->v[cpu->opcode.y];
-    cpu->v[0xF] = 0;
+    cpu->v[0xF] = 0x00u;
 }
 
 void OP_8xy4(Chip8_Cpu* cpu) // ADD Vx, Vy
@@ -259,41 +258,65 @@ void OP_8xy4(Chip8_Cpu* cpu) // ADD Vx, Vy
     uint16_t ans = cpu->v[cpu->opcode.x] + cpu->v[cpu->opcode.y];
 
     cpu->v[cpu->opcode.x] = ans & 0xFFu;
-    cpu->v[0xF] = (ans > 255u) ? 1 : 0;
+
+    if (ans > 255u)
+    {
+        cpu->v[0xF] = 0x01u;
+    }
+    else
+    {
+        cpu->v[0xF] = 0x00u;
+    }
 }
 
 void OP_8xy5(Chip8_Cpu* cpu) // SUB Vx, Vy
 {
-    uint8_t vx = cpu->v[cpu->opcode.x];
+    uint8_t tx = cpu->v[cpu->opcode.x];
 
     cpu->v[cpu->opcode.x] -= cpu->v[cpu->opcode.y];
-    cpu->v[0xF] = (vx >= cpu->v[cpu->opcode.y]) ? 1 : 0;
+
+    if (tx >= cpu->v[cpu->opcode.y])
+    {
+        cpu->v[0xF] = 0x01u;
+    }
+    else
+    {
+        cpu->v[0xF] = 0x00u;
+    }
 }
 
 void OP_8xy6(Chip8_Cpu* cpu) // SHR Vx {, Vy}
 {
-    uint8_t vx = cpu->v[cpu->opcode.x];
+    uint8_t tx = cpu->v[cpu->opcode.x];
 
     cpu->v[cpu->opcode.x] = cpu->v[cpu->opcode.y];
 
     cpu->v[cpu->opcode.x] >>= 1u;
-    cpu->v[0xF] = (vx & 0x01u);
+    cpu->v[0xF] = (tx & 0x01u);
 }
 
 void OP_8xy7(Chip8_Cpu* cpu) // SUBN Vx, Vy
 {
     cpu->v[cpu->opcode.x] = cpu->v[cpu->opcode.y] - cpu->v[cpu->opcode.x];
-    cpu->v[0xF] = (cpu->v[cpu->opcode.y] > cpu->v[cpu->opcode.x]) ? 1 : 0;
+
+    if (cpu->v[cpu->opcode.y] > cpu->v[cpu->opcode.x])
+    {
+        cpu->v[0xF] = 0x01u;
+    }
+    else
+    {
+        cpu->v[0xF] = 0x00u;
+    }
 }
 
 void OP_8xyE(Chip8_Cpu* cpu) // SHL Vx {, Vy}
 {
-    uint8_t vx = cpu->v[cpu->opcode.x];
+    uint8_t tx = cpu->v[cpu->opcode.x];
 
     cpu->v[cpu->opcode.x] = cpu->v[cpu->opcode.y];
 
     cpu->v[cpu->opcode.x] <<= 1u;
-    cpu->v[0xF] = (vx & 0x80u) >> 7u;
+    cpu->v[0xF] = (tx & 0x80u) >> 7u;
 }
 
 void OP_9xy0(Chip8_Cpu* cpu) // SNE Vx, Vy
@@ -335,8 +358,8 @@ void OP_Dxyn(Chip8_Cpu* cpu) // DRW Vx, Vy, nibble
         return;
     }
 
-    uint8_t vx = cpu->v[cpu->opcode.x] & (VIDEO_WIDTH - 1);
-    uint8_t vy = cpu->v[cpu->opcode.y] & (VIDEO_HEIGHT - 1);
+    uint8_t tx = cpu->v[cpu->opcode.x] & (VIDEO_WIDTH - 1);
+    uint8_t ty = cpu->v[cpu->opcode.y] & (VIDEO_HEIGHT - 1);
 
     cpu->v[0xF] = 0;
 
@@ -344,27 +367,29 @@ void OP_Dxyn(Chip8_Cpu* cpu) // DRW Vx, Vy, nibble
     {
         for (size_t col = 0; col < 8; col++)
         {
-            if (vx + col > VIDEO_WIDTH - 1 || vy + row > VIDEO_HEIGHT - 1)
+            if (tx + col > VIDEO_WIDTH - 1 || ty + row > VIDEO_HEIGHT - 1)
             {
                 break;
             }
 
-            if (cpu->memory[cpu->i + row] & (0x80u >> col))
+            uint8_t pixel = (cpu->memory[cpu->i + row] & (0x80u >> col)) != 0;
+
+            if (pixel)
             {
-                uint16_t tx = (vx + col) & (VIDEO_WIDTH - 1);
-                uint16_t ty = (vy + row) & (VIDEO_HEIGHT - 1);
+                uint8_t x = (tx + col) & (VIDEO_WIDTH - 1);
+                uint8_t y = (ty + row) & (VIDEO_HEIGHT - 1);
+                uint16_t index = y * VIDEO_WIDTH + x;
+                
+                uint8_t bit = 0x01u << (index & 0x07u);
 
-                uint16_t byte = ty * VIDEO_WIDTH + tx;
-                uint8_t bit = 1u << (byte & 0x07u);
+                index >>= 3u;
 
-                byte >>= 3u;
-
-                if (cpu->gfx[byte] & bit)
+                if (cpu->gfx[index] & bit)
                 {
                     cpu->v[0xF] = 1;
                 }
 
-                cpu->gfx[byte] ^= bit;
+                cpu->gfx[index] ^= bit;
             }
         }
     }
@@ -375,7 +400,10 @@ void OP_Dxyn(Chip8_Cpu* cpu) // DRW Vx, Vy, nibble
 
 void OP_Ex9E(Chip8_Cpu* cpu) // SKP Vx
 {
-    if (cpu->key & (0x00000001u << cpu->v[cpu->opcode.x])) cpu->pc += 2;
+    if (cpu->key & (0x00000001u << cpu->v[cpu->opcode.x])) 
+    {
+        cpu->pc += 2;
+    }
 }
 
 void OP_ExA1(Chip8_Cpu* cpu) // SKNP Vx
@@ -433,15 +461,15 @@ void OP_Fx29(Chip8_Cpu* cpu) // LD F, Vx
 
 void OP_Fx33(Chip8_Cpu* cpu) // LD B, Vx
 {
-    uint8_t vx = cpu->v[cpu->opcode.x];
+    uint8_t tx = cpu->v[cpu->opcode.x];
 
-    cpu->memory[cpu->i + 2] = vx % 10;
-    vx /= 10;
+    cpu->memory[cpu->i + 2] = tx % 10;
+    tx /= 10;
 
-    cpu->memory[cpu->i + 1] = vx % 10;
-    vx /= 10;
+    cpu->memory[cpu->i + 1] = tx % 10;
+    tx /= 10;
 
-    cpu->memory[cpu->i] = vx % 10;
+    cpu->memory[cpu->i] = tx % 10;
 }
 
 void OP_Fx55(Chip8_Cpu* cpu) // LD [I], Vx
