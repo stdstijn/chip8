@@ -69,9 +69,11 @@ typedef struct Chip8_Dispatcher
 
 struct Chip8_Cpu
 {
+    Chip8_Config config;
+    Chip8_Dispatcher dispatcher;
+    Chip8_Opcode opcode;
     uint8_t memory[MEMORY_SIZE];
     uint16_t pc;
-    Chip8_Opcode opcode;
     uint16_t stack[STACK_LEVELS];
     uint16_t sp;
     uint16_t i;
@@ -80,12 +82,11 @@ struct Chip8_Cpu
     uint8_t soundtimer;
     uint16_t key;
     uint8_t gfx[VIDEO_WIDTH * VIDEO_HEIGHT / 8];
-    Chip8_Dispatcher dispatcher;
     uint8_t vbi;
     uint8_t draw;
 };
 
-void Chip8_Create(Chip8_Cpu* cpu);
+void Chip8_Create(Chip8_Cpu* cpu, Chip8_Config config);
 void Chip8_Destroy(Chip8_Cpu* cpu);
 
 void Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time);
