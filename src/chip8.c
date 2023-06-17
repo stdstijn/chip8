@@ -1,22 +1,5 @@
 #include "chip8/chip8.h"
 
-static void dispatcher0X(Chip8_Cpu* cpu);
-static void dispatcher1X(Chip8_Cpu* cpu);
-static void dispatcher2X(Chip8_Cpu* cpu);
-static void dispatcher3X(Chip8_Cpu* cpu);
-static void dispatcher4X(Chip8_Cpu* cpu);
-static void dispatcher5X(Chip8_Cpu* cpu);
-static void dispatcher6X(Chip8_Cpu* cpu);
-static void dispatcher7X(Chip8_Cpu* cpu);
-static void dispatcher8X(Chip8_Cpu* cpu);
-static void dispatcher9X(Chip8_Cpu* cpu);
-static void dispatcherAX(Chip8_Cpu* cpu);
-static void dispatcherBX(Chip8_Cpu* cpu);
-static void dispatcherCX(Chip8_Cpu* cpu);
-static void dispatcherDX(Chip8_Cpu* cpu);
-static void dispatcherEX(Chip8_Cpu* cpu);
-static void dispatcherFX(Chip8_Cpu* cpu);
-
 static void clearMemory(void* ptr, size_t len)
 {
     uint8_t* cptr = ptr;
@@ -65,57 +48,7 @@ void Chip8_Create(Chip8_Cpu* cpu, Chip8_Config config)
 
     copyMemory(cpu->memory + FONTSET_ADDRESS, fontset, FONT_SIZE);
 
-    cpu->dispatcher.table0X[0x0] = OP_00E0;
-    cpu->dispatcher.table0X[0xE] = OP_00EE;
-    cpu->dispatcher.table1X[0x0] = OP_1nnn;
-    cpu->dispatcher.table2X[0x0] = OP_2nnn;
-    cpu->dispatcher.table3X[0x0] = OP_3xkk;
-    cpu->dispatcher.table4X[0x0] = OP_4xkk;
-    cpu->dispatcher.table5X[0x0] = OP_5xy0;
-    cpu->dispatcher.table6X[0x0] = OP_6xkk;
-    cpu->dispatcher.table7X[0x0] = OP_7xkk;
-    cpu->dispatcher.table8X[0x0] = OP_8xy0;
-    cpu->dispatcher.table8X[0x1] = OP_8xy1;
-    cpu->dispatcher.table8X[0x2] = OP_8xy2;
-    cpu->dispatcher.table8X[0x3] = OP_8xy3;
-    cpu->dispatcher.table8X[0x4] = OP_8xy4;
-    cpu->dispatcher.table8X[0x5] = OP_8xy5;
-    cpu->dispatcher.table8X[0x6] = OP_8xy6;
-    cpu->dispatcher.table8X[0x7] = OP_8xy7;
-    cpu->dispatcher.table8X[0xE] = OP_8xyE;
-    cpu->dispatcher.table9X[0x0] = OP_9xy0;
-    cpu->dispatcher.tableAX[0x0] = OP_Annn;
-    cpu->dispatcher.tableBX[0x0] = OP_Bnnn;
-    cpu->dispatcher.tableCX[0x0] = OP_Cxkk;
-    cpu->dispatcher.tableDX[0x0] = OP_Dxyn;
-    cpu->dispatcher.tableEX[0xE] = OP_Ex9E;
-    cpu->dispatcher.tableEX[0x1] = OP_ExA1;
-    cpu->dispatcher.tableFX[0x07] = OP_Fx07;
-    cpu->dispatcher.tableFX[0x0A] = OP_Fx0A;
-    cpu->dispatcher.tableFX[0x15] = OP_Fx15;
-    cpu->dispatcher.tableFX[0x18] = OP_Fx18;
-    cpu->dispatcher.tableFX[0x1E] = OP_Fx1E;
-    cpu->dispatcher.tableFX[0x29] = OP_Fx29;
-    cpu->dispatcher.tableFX[0x33] = OP_Fx33;
-    cpu->dispatcher.tableFX[0x55] = OP_Fx55;
-    cpu->dispatcher.tableFX[0x65] = OP_Fx65;
-
-    cpu->dispatcher.table[0x0] = dispatcher0X;
-    cpu->dispatcher.table[0x1] = dispatcher1X;
-    cpu->dispatcher.table[0x2] = dispatcher2X;
-    cpu->dispatcher.table[0x3] = dispatcher3X;
-    cpu->dispatcher.table[0x4] = dispatcher4X;
-    cpu->dispatcher.table[0x5] = dispatcher5X;
-    cpu->dispatcher.table[0x6] = dispatcher6X;
-    cpu->dispatcher.table[0x7] = dispatcher7X;
-    cpu->dispatcher.table[0x8] = dispatcher8X;
-    cpu->dispatcher.table[0x9] = dispatcher9X;
-    cpu->dispatcher.table[0xA] = dispatcherAX;
-    cpu->dispatcher.table[0xB] = dispatcherBX;
-    cpu->dispatcher.table[0xC] = dispatcherCX;
-    cpu->dispatcher.table[0xD] = dispatcherDX;
-    cpu->dispatcher.table[0xE] = dispatcherEX;
-    cpu->dispatcher.table[0xF] = dispatcherFX;
+    InitialiseDispatcher(cpu);
 }
 
 void Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time)
@@ -134,14 +67,15 @@ void Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time)
     cpu->pc += 2;
     cpu->draw = 0;
 
-    uint8_t instruction = (cpu->opcode.inst & 0xF000u) >> 12u;
-    OpcodeFunc operation = cpu->dispatcher.table[instruction];
+    uint16_t returncode = 0;
+    uint16_t instruction = (cpu->opcode.inst & 0xF000u) >> 12u;
+    Chip8_Dispatcher operation = cpu->Dispatcher[instruction];
 
     if (operation)
     {
-        operation(cpu);
+        returncode = operation(cpu);
     }
-    else
+    else if (!operation || !returncode)
     {
         // Handle unknown opcode
     }
@@ -168,35 +102,35 @@ void Chip8_Destroy(Chip8_Cpu* cpu)
     (void)cpu;
 }
 
-void OP_00E0(Chip8_Cpu* cpu) // CLS
+void Chip8_OP00E0(Chip8_Cpu* cpu) // CLS
 {
     clearMemory(cpu->gfx, sizeof(cpu->gfx));
 }
 
-void OP_00EE(Chip8_Cpu* cpu) // RET
+void Chip8_OP00EE(Chip8_Cpu* cpu) // RET
 {
     cpu->sp -= 1;
     cpu->pc = cpu->stack[cpu->sp];
 }
 
-void OP_0nnn(Chip8_Cpu* cpu) // SYS addr
+void Chip8_OP0nnn(Chip8_Cpu* cpu) // SYS addr
 {
     (void)cpu;
 }
 
-void OP_1nnn(Chip8_Cpu* cpu) // JMP addr
+void Chip8_OP1nnn(Chip8_Cpu* cpu) // JMP addr
 {
     cpu->pc = cpu->opcode.nnn;
 }
 
-void OP_2nnn(Chip8_Cpu* cpu) // CALL addr
+void Chip8_OP2nnn(Chip8_Cpu* cpu) // CALL addr
 {
     cpu->stack[cpu->sp] = cpu->pc;
     cpu->sp += 1;
     cpu->pc = cpu->opcode.nnn;
 }
 
-void OP_3xkk(Chip8_Cpu* cpu) // SE Vx, byte
+void Chip8_OP3xkk(Chip8_Cpu* cpu) // SE Vx, byte
 {
     if (cpu->v[cpu->opcode.x] == cpu->opcode.nn)
     {
@@ -204,7 +138,7 @@ void OP_3xkk(Chip8_Cpu* cpu) // SE Vx, byte
     }
 }
 
-void OP_4xkk(Chip8_Cpu* cpu) // SNE Vx, byte
+void Chip8_OP4xkk(Chip8_Cpu* cpu) // SNE Vx, byte
 {
     if (cpu->v[cpu->opcode.x] != cpu->opcode.nn)
     {
@@ -212,7 +146,7 @@ void OP_4xkk(Chip8_Cpu* cpu) // SNE Vx, byte
     }
 }
 
-void OP_5xy0(Chip8_Cpu* cpu) // SE Vx, Vy
+void Chip8_OP5xy0(Chip8_Cpu* cpu) // SE Vx, Vy
 {
     if (cpu->v[cpu->opcode.x] == cpu->v[cpu->opcode.y])
     {
@@ -220,22 +154,22 @@ void OP_5xy0(Chip8_Cpu* cpu) // SE Vx, Vy
     }
 }
 
-void OP_6xkk(Chip8_Cpu* cpu) // LD Vx, byte
+void Chip8_OP6xkk(Chip8_Cpu* cpu) // LD Vx, byte
 {
     cpu->v[cpu->opcode.x] = cpu->opcode.nn;
 }
 
-void OP_7xkk(Chip8_Cpu* cpu) // ADD Vx, byte
+void Chip8_OP7xkk(Chip8_Cpu* cpu) // ADD Vx, byte
 {
     cpu->v[cpu->opcode.x] += cpu->opcode.nn;
 }
 
-void OP_8xy0(Chip8_Cpu* cpu) // LD Vx, Vy
+void Chip8_OP8xy0(Chip8_Cpu* cpu) // LD Vx, Vy
 {
     cpu->v[cpu->opcode.x] = cpu->v[cpu->opcode.y];
 }
 
-void OP_8xy1(Chip8_Cpu* cpu) // OR Vx, Vy
+void Chip8_OP8xy1(Chip8_Cpu* cpu) // OR Vx, Vy
 {
     cpu->v[cpu->opcode.x] |= cpu->v[cpu->opcode.y];
 
@@ -245,7 +179,7 @@ void OP_8xy1(Chip8_Cpu* cpu) // OR Vx, Vy
     }
 }
 
-void OP_8xy2(Chip8_Cpu* cpu) // AND Vx, Vy
+void Chip8_OP8xy2(Chip8_Cpu* cpu) // AND Vx, Vy
 {
     cpu->v[cpu->opcode.x] &= cpu->v[cpu->opcode.y];
     
@@ -255,7 +189,7 @@ void OP_8xy2(Chip8_Cpu* cpu) // AND Vx, Vy
     }
 }
 
-void OP_8xy3(Chip8_Cpu* cpu) // XOR Vx, Vy
+void Chip8_OP8xy3(Chip8_Cpu* cpu) // XOR Vx, Vy
 {
     cpu->v[cpu->opcode.x] ^= cpu->v[cpu->opcode.y];
     
@@ -265,7 +199,7 @@ void OP_8xy3(Chip8_Cpu* cpu) // XOR Vx, Vy
     }
 }
 
-void OP_8xy4(Chip8_Cpu* cpu) // ADD Vx, Vy
+void Chip8_OP8xy4(Chip8_Cpu* cpu) // ADD Vx, Vy
 {
     uint16_t ans = cpu->v[cpu->opcode.x] + cpu->v[cpu->opcode.y];
 
@@ -281,7 +215,7 @@ void OP_8xy4(Chip8_Cpu* cpu) // ADD Vx, Vy
     }
 }
 
-void OP_8xy5(Chip8_Cpu* cpu) // SUB Vx, Vy
+void Chip8_OP8xy5(Chip8_Cpu* cpu) // SUB Vx, Vy
 {
     uint8_t tx = cpu->v[cpu->opcode.x];
 
@@ -297,7 +231,7 @@ void OP_8xy5(Chip8_Cpu* cpu) // SUB Vx, Vy
     }
 }
 
-void OP_8xy6(Chip8_Cpu* cpu) // SHR Vx {, Vy}
+void Chip8_OP8xy6(Chip8_Cpu* cpu) // SHR Vx {, Vy}
 {
     uint8_t tx = cpu->v[cpu->opcode.x];
 
@@ -310,7 +244,7 @@ void OP_8xy6(Chip8_Cpu* cpu) // SHR Vx {, Vy}
     cpu->v[0xF] = (tx & 0x01u);
 }
 
-void OP_8xy7(Chip8_Cpu* cpu) // SUBN Vx, Vy
+void Chip8_OP8xy7(Chip8_Cpu* cpu) // SUBN Vx, Vy
 {
     cpu->v[cpu->opcode.x] = cpu->v[cpu->opcode.y] - cpu->v[cpu->opcode.x];
 
@@ -324,7 +258,7 @@ void OP_8xy7(Chip8_Cpu* cpu) // SUBN Vx, Vy
     }
 }
 
-void OP_8xyE(Chip8_Cpu* cpu) // SHL Vx {, Vy}
+void Chip8_OP8xyE(Chip8_Cpu* cpu) // SHL Vx {, Vy}
 {
     uint8_t tx = cpu->v[cpu->opcode.x];
 
@@ -337,7 +271,7 @@ void OP_8xyE(Chip8_Cpu* cpu) // SHL Vx {, Vy}
     cpu->v[0xF] = (tx & 0x80u) >> 7u;
 }
 
-void OP_9xy0(Chip8_Cpu* cpu) // SNE Vx, Vy
+void Chip8_OP9xy0(Chip8_Cpu* cpu) // SNE Vx, Vy
 {
     if (cpu->v[cpu->opcode.x] != cpu->v[cpu->opcode.y])
     {
@@ -345,12 +279,12 @@ void OP_9xy0(Chip8_Cpu* cpu) // SNE Vx, Vy
     }
 }
 
-void OP_Annn(Chip8_Cpu* cpu) // LD I, addr
+void Chip8_OPAnnn(Chip8_Cpu* cpu) // LD I, addr
 {
     cpu->i = cpu->opcode.nnn;
 }
 
-void OP_Bnnn(Chip8_Cpu* cpu) // JP V0, addr
+void Chip8_OPBnnn(Chip8_Cpu* cpu) // JP V0, addr
 {
     if (cpu->config.jumping)
     {
@@ -362,7 +296,7 @@ void OP_Bnnn(Chip8_Cpu* cpu) // JP V0, addr
     }
 }
 
-void OP_Cxkk(Chip8_Cpu* cpu) // RND Vx, byte
+void Chip8_OPCxkk(Chip8_Cpu* cpu) // RND Vx, byte
 {
     static uint32_t seed = 0xB16B00B5u;
 
@@ -375,7 +309,7 @@ void OP_Cxkk(Chip8_Cpu* cpu) // RND Vx, byte
     cpu->v[cpu->opcode.x] = seed & cpu->opcode.nn;
 }
 
-void OP_Dxyn(Chip8_Cpu* cpu) // DRW Vx, Vy, nibble
+void Chip8_OPDxyn(Chip8_Cpu* cpu) // DRW Vx, Vy, nibble
 {
     if (cpu->config.display)
     {
@@ -429,7 +363,7 @@ void OP_Dxyn(Chip8_Cpu* cpu) // DRW Vx, Vy, nibble
     cpu->draw = 1;
 }
 
-void OP_Ex9E(Chip8_Cpu* cpu) // SKP Vx
+void Chip8_OPEx9E(Chip8_Cpu* cpu) // SKP Vx
 {
     if (cpu->key & (0x0001u << cpu->v[cpu->opcode.x])) 
     {
@@ -437,7 +371,7 @@ void OP_Ex9E(Chip8_Cpu* cpu) // SKP Vx
     }
 }
 
-void OP_ExA1(Chip8_Cpu* cpu) // SKNP Vx
+void Chip8_OPExA1(Chip8_Cpu* cpu) // SKNP Vx
 {
     if (!(cpu->key & (0x0001u << cpu->v[cpu->opcode.x])))
     {
@@ -445,12 +379,12 @@ void OP_ExA1(Chip8_Cpu* cpu) // SKNP Vx
     }
 }
 
-void OP_Fx07(Chip8_Cpu* cpu) // LD Vx, DT
+void Chip8_OPFx07(Chip8_Cpu* cpu) // LD Vx, DT
 {
     cpu->v[cpu->opcode.x] = cpu->delaytimer;
 }
 
-void OP_Fx0A(Chip8_Cpu* cpu) // LD Vx, K
+void Chip8_OPFx0A(Chip8_Cpu* cpu) // LD Vx, K
 {
     if (!cpu->key) 
     {
@@ -470,27 +404,27 @@ void OP_Fx0A(Chip8_Cpu* cpu) // LD Vx, K
     cpu->key = 0;
 }
 
-void OP_Fx15(Chip8_Cpu* cpu) // LD DT, Vx
+void Chip8_OPFx15(Chip8_Cpu* cpu) // LD DT, Vx
 {
     cpu->delaytimer = cpu->v[cpu->opcode.x];
 }
 
-void OP_Fx18(Chip8_Cpu* cpu) // LD ST, Vx
+void Chip8_OPFx18(Chip8_Cpu* cpu) // LD ST, Vx
 {
     cpu->soundtimer = cpu->v[cpu->opcode.x];
 }
 
-void OP_Fx1E(Chip8_Cpu* cpu) // ADD I, Vx
+void Chip8_OPFx1E(Chip8_Cpu* cpu) // ADD I, Vx
 {
     cpu->i += cpu->v[cpu->opcode.x];
 }
 
-void OP_Fx29(Chip8_Cpu* cpu) // LD F, Vx
+void Chip8_OPFx29(Chip8_Cpu* cpu) // LD F, Vx
 {
     cpu->i = FONTSET_ADDRESS + (5 * cpu->opcode.x);
 }
 
-void OP_Fx33(Chip8_Cpu* cpu) // LD B, Vx
+void Chip8_OPFx33(Chip8_Cpu* cpu) // LD B, Vx
 {
     uint8_t tx = cpu->v[cpu->opcode.x];
 
@@ -503,7 +437,7 @@ void OP_Fx33(Chip8_Cpu* cpu) // LD B, Vx
     cpu->memory[cpu->i] = tx % 10;
 }
 
-void OP_Fx55(Chip8_Cpu* cpu) // LD [I], Vx
+void Chip8_OPFx55(Chip8_Cpu* cpu) // LD [I], Vx
 {
     size_t i;
     for (i = 0; i <= cpu->opcode.x; i++)
@@ -517,7 +451,7 @@ void OP_Fx55(Chip8_Cpu* cpu) // LD [I], Vx
     }
 }
 
-void OP_Fx65(Chip8_Cpu* cpu) // LD Vx, [I]
+void Chip8_OPFx65(Chip8_Cpu* cpu) // LD Vx, [I]
 {
     size_t i;
     for (i = 0; i <= cpu->opcode.x; i++)
@@ -529,84 +463,4 @@ void OP_Fx65(Chip8_Cpu* cpu) // LD Vx, [I]
     {
         cpu->i += i;
     }
-}
-
-static void dispatcher0X(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.table0X[cpu->opcode.inst & 0x000Fu]))(cpu);
-}
-
-static void dispatcher1X(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.table1X[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcher2X(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.table2X[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcher3X(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.table3X[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcher4X(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.table4X[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcher5X(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.table5X[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcher6X(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.table6X[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcher7X(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.table7X[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcher8X(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.table8X[cpu->opcode.inst & 0x000Fu]))(cpu);
-}
-
-static void dispatcher9X(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.table9X[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcherAX(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.tableAX[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcherBX(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.tableBX[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcherCX(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.tableCX[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcherDX(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.tableDX[cpu->opcode.inst & 0x0000u]))(cpu);
-}
-
-static void dispatcherEX(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.tableEX[cpu->opcode.inst & 0x000Fu]))(cpu);
-}
-
-static void dispatcherFX(Chip8_Cpu* cpu)
-{
-    (*(cpu->dispatcher.tableFX[cpu->opcode.inst & 0x00FFu]))(cpu);
 }

@@ -1,7 +1,6 @@
-# file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${Chip8_SOURCE_DIR}/include/chip8/*.h")
-set(HEADER_LIST "${Chip8_SOURCE_DIR}/include/chip8/chip8.h")
+file(GLOB HEADER_LIST CONFIGURE_DEPENDS "${Chip8_SOURCE_DIR}/include/chip8/*.h")
 
-add_library(chip8 chip8.c ${HEADER_LIST})
+add_library(chip8 chip8.c dispatcher.c ${HEADER_LIST})
 
 target_include_directories(chip8 PUBLIC ../include)
 
