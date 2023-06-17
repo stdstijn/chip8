@@ -1,4 +1,5 @@
 #include "chip8/chip8.h"
+#include "chip8/dispatcher.h"
 
 static void clearMemory(void* ptr, size_t len)
 {
@@ -53,12 +54,12 @@ void Chip8_Create(Chip8_Cpu* cpu, Chip8_Config* config)
     }
     else
     {
-        cpu->config.reset = 1;
-        cpu->config.memory = 1;
-        cpu->config.display = 1;
-        cpu->config.clipping = 1;
-        cpu->config.shifting = 0;
-        cpu->config.jumping = 0;
+        cpu->config.flagReset = 1;
+        cpu->config.indexIncrement = 1;
+        cpu->config.displayWait = 1;
+        cpu->config.spriteClipping = 1;
+        cpu->config.shiftInPlace = 0;
+        cpu->config.jumpValue = 0;
     }
 }
 
@@ -175,7 +176,7 @@ void Chip8_Op8xy1(Chip8_Cpu* cpu) // OR Vx, Vy
 {
     cpu->v[cpu->opcode.x] |= cpu->v[cpu->opcode.y];
 
-    if (cpu->config.reset)
+    if (cpu->config.flagReset)
     {
         cpu->v[0xF] = 0x00u;
     }
@@ -185,7 +186,7 @@ void Chip8_Op8xy2(Chip8_Cpu* cpu) // AND Vx, Vy
 {
     cpu->v[cpu->opcode.x] &= cpu->v[cpu->opcode.y];
     
-    if (cpu->config.reset)
+    if (cpu->config.flagReset)
     {
         cpu->v[0xF] = 0x00u;
     }
@@ -195,7 +196,7 @@ void Chip8_Op8xy3(Chip8_Cpu* cpu) // XOR Vx, Vy
 {
     cpu->v[cpu->opcode.x] ^= cpu->v[cpu->opcode.y];
     
-    if (cpu->config.reset)
+    if (cpu->config.flagReset)
     {
         cpu->v[0xF] = 0x00u;
     }
@@ -237,7 +238,7 @@ void Chip8_Op8xy6(Chip8_Cpu* cpu) // SHR Vx {, Vy}
 {
     uint8_t tx = cpu->v[cpu->opcode.x];
 
-    if (!cpu->config.shifting)
+    if (!cpu->config.shiftInPlace)
     {
         cpu->v[cpu->opcode.x] = cpu->v[cpu->opcode.y];
     }
@@ -264,7 +265,7 @@ void Chip8_Op8xyE(Chip8_Cpu* cpu) // SHL Vx {, Vy}
 {
     uint8_t tx = cpu->v[cpu->opcode.x];
 
-    if (!cpu->config.shifting)
+    if (!cpu->config.shiftInPlace)
     {
         cpu->v[cpu->opcode.x] = cpu->v[cpu->opcode.y];
     }
@@ -288,7 +289,7 @@ void Chip8_OpAnnn(Chip8_Cpu* cpu) // LD I, addr
 
 void Chip8_OpBnnn(Chip8_Cpu* cpu) // JP V0, addr
 {
-    if (cpu->config.jumping)
+    if (cpu->config.jumpValue)
     {
         cpu->pc = cpu->opcode.nnn + cpu->v[(cpu->opcode.inst & 0x0F00) >> 8u];
     }
@@ -313,7 +314,7 @@ void Chip8_OpCxkk(Chip8_Cpu* cpu) // RND Vx, byte
 
 void Chip8_OpDxyn(Chip8_Cpu* cpu) // DRW Vx, Vy, nibble
 {
-    if (cpu->config.display)
+    if (cpu->config.displayWait)
     {
         if (cpu->vbi == 0)
         {
@@ -321,6 +322,8 @@ void Chip8_OpDxyn(Chip8_Cpu* cpu) // DRW Vx, Vy, nibble
             return;
         }
     }
+    
+    cpu->vbi = 0;
     
     uint8_t tx = cpu->v[cpu->opcode.x] & (VIDEO_WIDTH - 1);
     uint8_t ty = cpu->v[cpu->opcode.y] & (VIDEO_HEIGHT - 1);
@@ -331,7 +334,7 @@ void Chip8_OpDxyn(Chip8_Cpu* cpu) // DRW Vx, Vy, nibble
     {
         for (size_t col = 0; col < 8; col++)
         {
-            if (cpu->config.clipping)
+            if (cpu->config.spriteClipping)
             {
                 if (tx + col > VIDEO_WIDTH - 1 || ty + row > VIDEO_HEIGHT - 1)
                 {
@@ -361,7 +364,6 @@ void Chip8_OpDxyn(Chip8_Cpu* cpu) // DRW Vx, Vy, nibble
         }
     }
 
-    cpu->vbi = 0;
     cpu->draw = 1;
 }
 
@@ -447,7 +449,7 @@ void Chip8_OpFx55(Chip8_Cpu* cpu) // LD [I], Vx
         cpu->memory[cpu->i + i] = cpu->v[i];
     }
 
-    if (cpu->config.memory)
+    if (cpu->config.indexIncrement)
     {
         cpu->i += i;
     }
@@ -461,7 +463,7 @@ void Chip8_OpFx65(Chip8_Cpu* cpu) // LD Vx, [I]
         cpu->v[i] = cpu->memory[cpu->i + i];
     }
 
-    if (cpu->config.memory)
+    if (cpu->config.indexIncrement)
     {
         cpu->i += i;
     }

@@ -1,8 +1,6 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
-#include "chip8/dispatcher.h"
-
 #include <stddef.h>
 #include <stdint.h>
 
@@ -25,12 +23,12 @@ enum Chip8_VirtualMachineDescription
 
 typedef struct Chip8_Config
 {
-    uint8_t reset;
-    uint8_t memory;
-    uint8_t display;
-    uint8_t clipping;
-    uint8_t shifting;
-    uint8_t jumping;
+    uint8_t flagReset;
+    uint8_t indexIncrement;
+    uint8_t displayWait;
+    uint8_t spriteClipping;
+    uint8_t shiftInPlace;
+    uint8_t jumpValue;
 } Chip8_Config;
 
 typedef struct Chip8_Opcode
@@ -45,7 +43,6 @@ typedef struct Chip8_Opcode
 
 struct Chip8_Cpu
 {
-    Chip8_Config config;
     Chip8_Opcode opcode;
     uint8_t memory[MEMORY_SIZE];
     uint16_t pc;
@@ -59,6 +56,7 @@ struct Chip8_Cpu
     uint8_t gfx[VIDEO_WIDTH * VIDEO_HEIGHT / 8];
     uint8_t vbi;
     uint8_t draw;
+    Chip8_Config config;
 };
 
 void Chip8_Create(Chip8_Cpu* cpu, Chip8_Config* config);
