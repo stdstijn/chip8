@@ -1,5 +1,5 @@
-#ifndef DISPATCHER_H
-#define DISPATCHER_H
+#ifndef CHIP8_DISPATCHER_H
+#define CHIP8_DISPATCHER_H
 
 #include "chip8/chip8.h"
 
@@ -7,6 +7,12 @@
 
 typedef struct Chip8_Cpu Chip8_Cpu;
 
-void InitialiseDispatcher(Chip8_Cpu* cpu);
+typedef enum Chip8_DispatchCodes
+{
+    OPCODE_OK = 0,
+    OPCODE_INVALID = 1
+} Chip8_DispatchCodes;
 
-#endif // DISPATCHER_H
+Chip8_DispatchCodes Chip8_DispatchOpcode(Chip8_Cpu* cpu);
+
+#endif // CHIP8_DISPATCHER_H

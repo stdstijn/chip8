@@ -1,210 +1,144 @@
 #include "chip8/dispatcher.h"
 
-static uint16_t dispatcher0X(Chip8_Cpu* cpu)
+Chip8_DispatchCodes Chip8_DispatchOpcode(Chip8_Cpu* cpu)
 {
-    uint8_t nibble = cpu->opcode.inst & 0x000Fu;
+    uint16_t opcode = cpu->opcode.inst & 0xF000u;
 
-    if (nibble > 0xE)
+    switch (opcode)
     {
-        return cpu->opcode.inst;
+    case 0x0000:
+        switch (cpu->opcode.n)
+        {
+        case 0x0000:
+            Chip8_Op00E0(cpu);
+            break;
+        case 0x000E:
+            Chip8_Op00EE(cpu);
+            break;
+        default:
+            return OPCODE_INVALID;
+        }
+        break;
+    case 0x1000:
+        Chip8_Op1nnn(cpu);
+        break;
+    case 0x2000:
+        Chip8_Op2nnn(cpu);
+        break;
+    case 0x3000:
+        Chip8_Op3xkk(cpu);
+        break;
+    case 0x4000:
+        Chip8_Op4xkk(cpu);
+        break;
+    case 0x5000:
+        Chip8_Op5xy0(cpu);
+        break;
+    case 0x6000:
+        Chip8_Op6xkk(cpu);
+        break;
+    case 0x7000:
+        Chip8_Op7xkk(cpu);
+        break;
+    case 0x8000:
+        switch (cpu->opcode.n)
+        {
+        case 0x0000:
+            Chip8_Op8xy0(cpu);
+            break;
+        case 0x0001:
+            Chip8_Op8xy1(cpu);
+            break;
+        case 0x0002:
+            Chip8_Op8xy2(cpu);
+            break;
+        case 0x0003:
+            Chip8_Op8xy3(cpu);
+            break;
+        case 0x0004:
+            Chip8_Op8xy4(cpu);
+            break;
+        case 0x0005:
+            Chip8_Op8xy5(cpu);
+            break;
+        case 0x0006:
+            Chip8_Op8xy6(cpu);
+            break;
+        case 0x0007:
+            Chip8_Op8xy7(cpu);
+            break;
+        case 0x000E:
+            Chip8_Op8xyE(cpu);
+            break;
+        default:
+            return OPCODE_INVALID;
+        }
+        break;
+    case 0x9000:
+        Chip8_Op9xy0(cpu);
+        break;
+    case 0xA000:
+        Chip8_OpAnnn(cpu);
+        break;
+    case 0xB000:
+        Chip8_OpBnnn(cpu);
+        break;
+    case 0xC000:
+        Chip8_OpCxkk(cpu);
+        break;
+    case 0xD000:
+        Chip8_OpDxyn(cpu);
+        break;
+    case 0xE000:
+        switch (cpu->opcode.nn)
+        {
+        case 0x009E:
+            Chip8_OpEx9E(cpu);
+            break;
+        case 0x00A1:
+            Chip8_OpExA1(cpu);
+            break;
+        default:
+            return OPCODE_INVALID;
+        }
+        break;
+    case 0xF000:
+        switch (cpu->opcode.nn)
+        {
+        case 0x0007:
+            Chip8_OpFx07(cpu);
+            break;
+        case 0x000A:
+            Chip8_OpFx0A(cpu);
+            break;
+        case 0x0015:
+            Chip8_OpFx15(cpu);
+            break;
+        case 0x0018:
+            Chip8_OpFx18(cpu);
+            break;
+        case 0x001E:
+            Chip8_OpFx1E(cpu);
+            break;
+        case 0x0029:
+            Chip8_OpFx29(cpu);
+            break;
+        case 0x0033:
+            Chip8_OpFx33(cpu);
+            break;
+        case 0x0055:
+            Chip8_OpFx55(cpu);
+            break;
+        case 0x0065:
+            Chip8_OpFx65(cpu);
+            break;
+        default:
+            return OPCODE_INVALID;
+        }
+        break;
+    default:
+        return OPCODE_INVALID;
     }
 
-    (*(cpu->OP0x[nibble]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcher1X(Chip8_Cpu* cpu)
-{
-    (*(cpu->OP1x[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcher2X(Chip8_Cpu* cpu)
-{
-    (*(cpu->OP2x[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcher3X(Chip8_Cpu* cpu)
-{
-    (*(cpu->OP3x[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcher4X(Chip8_Cpu* cpu)
-{
-    (*(cpu->OP4x[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcher5X(Chip8_Cpu* cpu)
-{
-    (*(cpu->OP5x[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcher6X(Chip8_Cpu* cpu)
-{
-    (*(cpu->OP6x[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcher7X(Chip8_Cpu* cpu)
-{
-    (*(cpu->OP7x[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcher8X(Chip8_Cpu* cpu)
-{
-    uint8_t nibble = cpu->opcode.inst & 0x000Fu;
-
-    if (nibble > 0xE)
-    {
-        return cpu->opcode.inst;
-    }
-
-    (*(cpu->OP8x[nibble]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcher9X(Chip8_Cpu* cpu)
-{
-    (*(cpu->OP9x[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcherAX(Chip8_Cpu* cpu)
-{
-    (*(cpu->OPAx[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcherBX(Chip8_Cpu* cpu)
-{
-    (*(cpu->OPBx[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcherCX(Chip8_Cpu* cpu)
-{
-    (*(cpu->OPCx[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcherDX(Chip8_Cpu* cpu)
-{
-    (*(cpu->OPDx[0x0]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcherEX(Chip8_Cpu* cpu)
-{
-    uint8_t nibble = cpu->opcode.inst & 0x000Fu;
-
-    if (nibble > 0xE)
-    {
-        return cpu->opcode.inst;
-    }
-
-    (*(cpu->OPEx[nibble]))(cpu);
-
-    return 0;
-}
-
-static uint16_t dispatcherFX(Chip8_Cpu* cpu)
-{
-    uint8_t nibble = cpu->opcode.inst & 0x00FFu;
-
-    if (nibble > 0x65)
-    {
-        return cpu->opcode.inst;
-    }
-
-    (*(cpu->OPFx[nibble]))(cpu);
-
-    return 0;
-}
-
-void InitialiseDispatcher(Chip8_Cpu* cpu)
-{
-    cpu->Dispatcher[0x0] = dispatcher0X;
-    cpu->OP0x[0x00] = Chip8_OP00E0;
-    cpu->OP0x[0x0E] = Chip8_OP00EE;
-
-    cpu->Dispatcher[0x1] = dispatcher1X;
-    cpu->OP1x[0x00] = Chip8_OP1nnn;
-
-    cpu->Dispatcher[0x2] = dispatcher2X;
-    cpu->OP2x[0x00] = Chip8_OP2nnn;
-
-    cpu->Dispatcher[0x3] = dispatcher3X;
-    cpu->OP3x[0x00] = Chip8_OP3xkk;
-
-    cpu->Dispatcher[0x4] = dispatcher4X;
-    cpu->OP4x[0x00] = Chip8_OP4xkk;
-
-    cpu->Dispatcher[0x5] = dispatcher5X;
-    cpu->OP5x[0x00] = Chip8_OP5xy0;
-
-    cpu->Dispatcher[0x6] = dispatcher6X;
-    cpu->OP6x[0x00] = Chip8_OP6xkk;
-
-    cpu->Dispatcher[0x7] = dispatcher7X;
-    cpu->OP7x[0x00] = Chip8_OP7xkk;
-
-    cpu->Dispatcher[0x8] = dispatcher8X;
-    cpu->OP8x[0x00] = Chip8_OP8xy0;
-    cpu->OP8x[0x01] = Chip8_OP8xy1;
-    cpu->OP8x[0x02] = Chip8_OP8xy2;
-    cpu->OP8x[0x03] = Chip8_OP8xy3;
-    cpu->OP8x[0x04] = Chip8_OP8xy4;
-    cpu->OP8x[0x05] = Chip8_OP8xy5;
-    cpu->OP8x[0x06] = Chip8_OP8xy6;
-    cpu->OP8x[0x07] = Chip8_OP8xy7;
-    cpu->OP8x[0x0E] = Chip8_OP8xyE;
-
-    cpu->Dispatcher[0x9] = dispatcher9X;
-    cpu->OP9x[0x00] = Chip8_OP9xy0;
-
-    cpu->Dispatcher[0xA] = dispatcherAX;
-    cpu->OPAx[0x00] = Chip8_OPAnnn;
-
-    cpu->Dispatcher[0xB] = dispatcherBX;
-    cpu->OPBx[0x00] = Chip8_OPBnnn;
-
-    cpu->Dispatcher[0xC] = dispatcherCX;
-    cpu->OPCx[0x00] = Chip8_OPCxkk;
-
-    cpu->Dispatcher[0xD] = dispatcherDX;
-    cpu->OPDx[0x00] = Chip8_OPDxyn;
-
-    cpu->Dispatcher[0xE] = dispatcherEX;
-    cpu->OPEx[0x0E] = Chip8_OPEx9E;
-    cpu->OPEx[0x01] = Chip8_OPExA1;
-
-    cpu->Dispatcher[0xF] = dispatcherFX;
-    cpu->OPFx[0x07] = Chip8_OPFx07;
-    cpu->OPFx[0x0A] = Chip8_OPFx0A;
-    cpu->OPFx[0x15] = Chip8_OPFx15;
-    cpu->OPFx[0x18] = Chip8_OPFx18;
-    cpu->OPFx[0x1E] = Chip8_OPFx1E;
-    cpu->OPFx[0x29] = Chip8_OPFx29;
-    cpu->OPFx[0x33] = Chip8_OPFx33;
-    cpu->OPFx[0x55] = Chip8_OPFx55;
-    cpu->OPFx[0x65] = Chip8_OPFx65;
+    return OPCODE_OK;
 }

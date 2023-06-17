@@ -6,16 +6,7 @@ static Chip8_Cpu chip8;
 
 void setUp(void)
 {
-    Chip8_Config config = {
-        .reset = 1,
-        .memory = 1,
-        .display = 1,
-        .clipping = 1,
-        .shifting = 0,
-        .jumping = 0
-    };
-
-    Chip8_Create(&chip8, config);
+    Chip8_Create(&chip8, NULL);
 }
 
 void tearDown(void)
@@ -25,16 +16,7 @@ void tearDown(void)
 
 void chip8_Chip8Create_WithReferenceToEmptyCPU_InitializesCPU(void)
 {
-    Chip8_Config config = {
-        .reset = 1,
-        .memory = 1,
-        .display = 1,
-        .clipping = 1,
-        .shifting = 0,
-        .jumping = 0
-    };
-
-    Chip8_Create(&chip8, config);
+    Chip8_Create(&chip8, NULL);
 
     TEST_ASSERT_EQUAL_UINT16(0x200, chip8.pc);
 }
