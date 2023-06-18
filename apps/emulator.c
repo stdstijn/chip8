@@ -1,6 +1,6 @@
 #include "chip8/chip8.h"
 
-#include <SDL2/SDL.h>
+#include "SDL.h"
 
 typedef struct Platform
 {
@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
     if (argc != 2)
     {
         SDL_Log("Usage: %s <ROM>\n", argv[0]);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     const char* romFilename = argv[1];
@@ -28,14 +28,23 @@ int main(int argc, char* argv[])
     if (!fp)
     {
         SDL_Log("emulator could not open ROM: %s", romFilename);
-        return 1;
+        return EXIT_FAILURE;
     }
 
     Platform plat = { 0 };
     PlatformCreate(&plat, "CHIP-8 Emulator", VIDEO_WIDTH, VIDEO_HEIGHT, 10);
 
+    Chip8_Config config = {
+        .flagReset = 1,
+        .indexIncrement = 1,
+        .displayWait = 1,
+        .spriteClipping = 1,
+        .shiftInPlace = 0,
+        .jumpValue = 0
+    };
+
     Chip8_Cpu chip8 = { 0 };
-    Chip8_Create(&chip8);
+    Chip8_Create(&chip8, &config);
 
     size_t memsize = MEMORY_SIZE - START_ADDRESS;
     SDL_RWread(fp, chip8.memory + START_ADDRESS, 1, memsize);
@@ -43,7 +52,6 @@ int main(int argc, char* argv[])
 
     int quit = 0;
     int time = 0;
-    int lastPlatformUpdate = 0;
 
     while (!quit)
     {
@@ -52,17 +60,15 @@ int main(int argc, char* argv[])
 
         Chip8_Cycle(&chip8, time);
 
-        if (time - lastPlatformUpdate >= 1000.0 / CLOCK_HZ + 0.5)
+        if (chip8.draw)
         {
             PlatformUpdate(&plat, chip8.gfx);
-
-            lastPlatformUpdate = time;
         }
     }
 
     PlatformDestroy(&plat);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
 
 void PlatformCreate(Platform* p, const char* title, int w, int h, int scale)
