@@ -21,6 +21,12 @@ enum Chip8_VirtualMachineDescription
     FONT_SIZE = 80
 };
 
+typedef enum Chip8_CycleCodes
+{
+    CYCLE_OK = 0,
+    CYCLE_NOT_IMPLEMENTED = 1
+} Chip8_CycleCodes;
+
 typedef struct Chip8_Config
 {
     uint8_t flagReset;
@@ -62,7 +68,7 @@ struct Chip8_Cpu
 void Chip8_Create(Chip8_Cpu* cpu, Chip8_Config* config);
 void Chip8_Destroy(Chip8_Cpu* cpu);
 
-void Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time);
+Chip8_CycleCodes Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time);
 
 void Chip8_Op00E0(Chip8_Cpu* cpu); // CLS
 void Chip8_Op00EE(Chip8_Cpu* cpu); // RET

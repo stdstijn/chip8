@@ -13,14 +13,22 @@ void PlatformCreate(Platform* p, const char* title, int w, int h, int scale)
 {
     SDL_Init(SDL_INIT_VIDEO);
 
-    p->window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED, w * scale, h * scale, 0);
+    p->window = SDL_CreateWindow(title, 
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED, 
+        w * scale, 
+        h * scale, 
+        0);
 
-    p->renderer = SDL_CreateRenderer(p->window, -1,
+    p->renderer = SDL_CreateRenderer(p->window, 
+        -1,
         SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 
-    p->texture = SDL_CreateTexture(p->renderer, SDL_PIXELFORMAT_RGBA8888,
-        SDL_TEXTUREACCESS_STREAMING, w, h);
+    p->texture = SDL_CreateTexture(p->renderer, 
+        SDL_PIXELFORMAT_RGBA8888,
+        SDL_TEXTUREACCESS_STREAMING, 
+        w, 
+        h);
 }
 
 void PlatformDestroy(Platform* p)
@@ -185,6 +193,7 @@ int main(int argc, char* argv[])
 
     int quit = 0;
     int time = 0;
+    int last = 0;
 
     while (!quit)
     {
@@ -193,9 +202,10 @@ int main(int argc, char* argv[])
 
         Chip8_Cycle(&chip8, time);
 
-        if (chip8.draw)
+        if (time - last >= 1000.0f / CLOCK_HZ)
         {
             PlatformUpdate(&plat, chip8.gfx);
+            last = time;
         }
     }
 

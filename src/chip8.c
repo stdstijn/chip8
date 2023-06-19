@@ -63,8 +63,10 @@ void Chip8_Create(Chip8_Cpu* cpu, Chip8_Config* config)
     }
 }
 
-void Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time)
-{    
+Chip8_CycleCodes Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time)
+{
+    Chip8_CycleCodes cycleCode = CYCLE_OK;
+
     cpu->opcode.inst = (cpu->memory[cpu->pc] << 8u) | cpu->memory[cpu->pc + 1];
     cpu->pc += 2;
 
@@ -76,15 +78,16 @@ void Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time)
     
     cpu->draw = 0;
 
-    Chip8_DispatchCodes returncode = Chip8_DispatchOpcode(cpu);
+    Chip8_DispatchCodes dispatchCode = Chip8_DispatchOpcode(cpu);
 
-    if (returncode == OPCODE_INVALID)
+    if (dispatchCode == DISPATCH_OPCODE_FAIL)
     {
-        // Handle unknown opcode
+        cycleCode = CYCLE_NOT_IMPLEMENTED;
     }
 
     static uint32_t lastTick = 0;
-    if (time - lastTick >= 1000.0 / CLOCK_HZ + 0.5)
+
+    if (time - lastTick >= 1000.0 / CLOCK_HZ)
     {
         if (cpu->delaytimer > 0)
         {
@@ -98,6 +101,8 @@ void Chip8_Cycle(Chip8_Cpu* cpu, const uint32_t time)
         lastTick = time;
         cpu->vbi = 1;
     }
+
+    return cycleCode;
 }
 
 void Chip8_Destroy(Chip8_Cpu* cpu)

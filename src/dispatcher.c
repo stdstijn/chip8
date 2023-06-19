@@ -16,7 +16,7 @@ Chip8_DispatchCodes Chip8_DispatchOpcode(Chip8_Cpu* cpu)
             Chip8_Op00EE(cpu);
             break;
         default:
-            return OPCODE_INVALID;
+            return DISPATCH_OPCODE_FAIL;
         }
         break;
     case 0x1000:
@@ -71,7 +71,7 @@ Chip8_DispatchCodes Chip8_DispatchOpcode(Chip8_Cpu* cpu)
             Chip8_Op8xyE(cpu);
             break;
         default:
-            return OPCODE_INVALID;
+            return DISPATCH_OPCODE_FAIL;
         }
         break;
     case 0x9000:
@@ -99,7 +99,7 @@ Chip8_DispatchCodes Chip8_DispatchOpcode(Chip8_Cpu* cpu)
             Chip8_OpExA1(cpu);
             break;
         default:
-            return OPCODE_INVALID;
+            return DISPATCH_OPCODE_FAIL;
         }
         break;
     case 0xF000:
@@ -133,12 +133,12 @@ Chip8_DispatchCodes Chip8_DispatchOpcode(Chip8_Cpu* cpu)
             Chip8_OpFx65(cpu);
             break;
         default:
-            return OPCODE_INVALID;
+            return DISPATCH_OPCODE_FAIL;
         }
         break;
     default:
-        return OPCODE_INVALID;
+        return DISPATCH_OPCODE_FAIL;
     }
 
-    return OPCODE_OK;
+    return DISPATCH_OPCODE_OK;
 }
